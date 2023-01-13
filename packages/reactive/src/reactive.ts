@@ -49,6 +49,11 @@ export async function createReactiveFileSystem(options: ReactiveFileSystemOption
     return file
   }
 
+  function list (folderRelativePath = '') {
+    folderRelativePath = folderRelativePath.replace(/^\.\/?/, '')
+    return Object.keys(ctx.state.files).filter(key => key.startsWith(folderRelativePath))
+  }
+
   async function destroy() {
     for (const e of effects) {
       // @ts-expect-error error
@@ -65,6 +70,7 @@ export async function createReactiveFileSystem(options: ReactiveFileSystemOption
       return ctx.state.files
     },
     effect,
+    list,
     watchFile,
     createFile,
     destroy,
