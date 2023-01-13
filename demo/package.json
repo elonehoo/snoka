@@ -1,0 +1,16 @@
+{
+  "name": "@snoka/demo",
+  "version": "0.0.0",
+  "private": "true",
+  "author": "Elone Hoo <hi@elonehoo.me>",
+  "license": "MIT",
+  "keywords": [],
+  "scripts": {
+    "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/"
+  },
+  "dependencies": {
+    "@snoka/cli": "workspace:*",
+    "@snoka/server": "workspace:*",
+    "nodemon": "^2.0.20"
+  }
+}
