@@ -3,6 +3,12 @@
  * Do not make changes to this file directly
  */
 
+
+
+
+
+
+
 declare global {
   interface NexusGen extends NexusGenTypes {}
 }
@@ -22,7 +28,7 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  Query: {}
+  Query: {};
 }
 
 export interface NexusGenInterfaces {
@@ -37,7 +43,7 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
   Query: { // field return type
-    ok: boolean // Boolean!
+    ok: boolean; // Boolean!
   }
 }
 
@@ -56,23 +62,23 @@ export interface NexusGenAbstractTypeMembers {
 export interface NexusGenTypeInterfaces {
 }
 
-export type NexusGenObjectNames = keyof NexusGenObjects
+export type NexusGenObjectNames = keyof NexusGenObjects;
 
-export type NexusGenInputNames = never
+export type NexusGenInputNames = never;
 
-export type NexusGenEnumNames = never
+export type NexusGenEnumNames = never;
 
-export type NexusGenInterfaceNames = never
+export type NexusGenInterfaceNames = never;
 
-export type NexusGenScalarNames = keyof NexusGenScalars
+export type NexusGenScalarNames = keyof NexusGenScalars;
 
-export type NexusGenUnionNames = never
+export type NexusGenUnionNames = never;
 
-export type NexusGenObjectsUsingAbstractStrategyIsTypeOf = never
+export type NexusGenObjectsUsingAbstractStrategyIsTypeOf = never;
 
-export type NexusGenAbstractsUsingStrategyResolveType = never
+export type NexusGenAbstractsUsingStrategyResolveType = never;
 
-export interface NexusGenFeaturesConfig {
+export type NexusGenFeaturesConfig = {
   abstractTypeStrategies: {
     isTypeOf: false
     resolveType: true
@@ -81,30 +87,31 @@ export interface NexusGenFeaturesConfig {
 }
 
 export interface NexusGenTypes {
-  context: any
-  inputTypes: NexusGenInputs
-  rootTypes: NexusGenRootTypes
-  inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars
-  argTypes: NexusGenArgTypes
-  fieldTypes: NexusGenFieldTypes
-  fieldTypeNames: NexusGenFieldTypeNames
-  allTypes: NexusGenAllTypes
-  typeInterfaces: NexusGenTypeInterfaces
-  objectNames: NexusGenObjectNames
-  inputNames: NexusGenInputNames
-  enumNames: NexusGenEnumNames
-  interfaceNames: NexusGenInterfaceNames
-  scalarNames: NexusGenScalarNames
-  unionNames: NexusGenUnionNames
-  allInputTypes: NexusGenTypes['inputNames'] | NexusGenTypes['enumNames'] | NexusGenTypes['scalarNames']
-  allOutputTypes: NexusGenTypes['objectNames'] | NexusGenTypes['enumNames'] | NexusGenTypes['unionNames'] | NexusGenTypes['interfaceNames'] | NexusGenTypes['scalarNames']
+  context: any;
+  inputTypes: NexusGenInputs;
+  rootTypes: NexusGenRootTypes;
+  inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars;
+  argTypes: NexusGenArgTypes;
+  fieldTypes: NexusGenFieldTypes;
+  fieldTypeNames: NexusGenFieldTypeNames;
+  allTypes: NexusGenAllTypes;
+  typeInterfaces: NexusGenTypeInterfaces;
+  objectNames: NexusGenObjectNames;
+  inputNames: NexusGenInputNames;
+  enumNames: NexusGenEnumNames;
+  interfaceNames: NexusGenInterfaceNames;
+  scalarNames: NexusGenScalarNames;
+  unionNames: NexusGenUnionNames;
+  allInputTypes: NexusGenTypes['inputNames'] | NexusGenTypes['enumNames'] | NexusGenTypes['scalarNames'];
+  allOutputTypes: NexusGenTypes['objectNames'] | NexusGenTypes['enumNames'] | NexusGenTypes['unionNames'] | NexusGenTypes['interfaceNames'] | NexusGenTypes['scalarNames'];
   allNamedTypes: NexusGenTypes['allInputTypes'] | NexusGenTypes['allOutputTypes']
-  abstractTypes: NexusGenTypes['interfaceNames'] | NexusGenTypes['unionNames']
-  abstractTypeMembers: NexusGenAbstractTypeMembers
-  objectsUsingAbstractStrategyIsTypeOf: NexusGenObjectsUsingAbstractStrategyIsTypeOf
-  abstractsUsingStrategyResolveType: NexusGenAbstractsUsingStrategyResolveType
-  features: NexusGenFeaturesConfig
+  abstractTypes: NexusGenTypes['interfaceNames'] | NexusGenTypes['unionNames'];
+  abstractTypeMembers: NexusGenAbstractTypeMembers;
+  objectsUsingAbstractStrategyIsTypeOf: NexusGenObjectsUsingAbstractStrategyIsTypeOf;
+  abstractsUsingStrategyResolveType: NexusGenAbstractsUsingStrategyResolveType;
+  features: NexusGenFeaturesConfig;
 }
+
 
 declare global {
   interface NexusGenPluginTypeConfig<TypeName extends string> {

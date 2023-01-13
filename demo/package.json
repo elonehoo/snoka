@@ -6,7 +6,7 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
-    "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/"
+    "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/ --ignore demo/"
   },
   "dependencies": {
     "@snoka/cli": "workspace:*",

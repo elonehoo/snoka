@@ -1,17 +1,13 @@
 {
-  "name": "@snoka/cli",
+  "name": "@snoka/reactive",
   "type": "module",
   "version": "0.0.0",
-  "description": "",
   "author": "Elone Hoo <hi@elonehoo.me>",
   "license": "MIT",
   "keywords": [],
   "main": "./dist/index.js",
   "module": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "snoka": "./dist/index.js"
-  },
   "files": [
     "dist"
   ],
@@ -20,6 +16,11 @@
     "build:fix": "esno scripts/postbuild.ts"
   },
   "dependencies": {
-    "commander": "^9.5.0"
+    "@vue/reactivity": "^3.2.45",
+    "chokidar": "^3.5.3",
+    "fs-extra": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1"
   }
 }
