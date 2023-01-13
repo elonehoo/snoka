@@ -25,7 +25,7 @@ importers:
   demo:
     specifiers:
       '@snoka/cli': workspace:*
-      '@snoka/runner': workspace:^0.0.0
+      '@snoka/runner': workspace:*
       '@snoka/server': workspace:*
       nodemon: ^2.0.20
       ts-node: ^10.9.1
@@ -62,6 +62,7 @@ importers:
       '@rollup/plugin-typescript': ^11.0.0
       '@snoka/reactive': workspace:*
       '@types/sinon': ^10.0.13
+      '@types/workerpool': ^6.1.1
       fs-monkey: ^1.0.3
       memfs: ^3.4.13
       must: ^0.13.4
@@ -86,6 +87,8 @@ importers:
       typescript: 4.9.4
       unionfs: 4.4.0
       workerpool: 6.3.1
+    devDependencies:
+      '@types/workerpool': 6.1.1
 
   packages/server:
     specifiers:
@@ -1015,6 +1018,12 @@ packages:
 
   /@types/unist/2.0.6:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
+    dev: true
+
+  /@types/workerpool/6.1.1:
+    resolution: {integrity: sha512-o7oSOSEiu8u9pCRv5+1AA61HlL7ruX07NrAQS3bufWXqH0fJSwP7e/1W/PFVCOY634Xz/JLHqXJAHwpogdRvNg==}
+    dependencies:
+      '@types/node': 18.11.18
     dev: true
 
   /@typescript-eslint/eslint-plugin/5.48.1_3jon24igvnqaqexgwtxk6nkpse:

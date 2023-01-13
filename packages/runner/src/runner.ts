@@ -10,7 +10,7 @@ import must from 'must'
 import { install as installSourceMap } from 'source-map-support'
 import { dirname, join } from 'path'
 
-interface RunTestFileOptions {
+export interface RunTestFileOptions {
   entry: string
 }
 
@@ -21,6 +21,7 @@ interface Context {
 
 interface TestSuite {
   title: string
+  filePath: string
   beforeAllHandlers: (() => unknown)[]
   beforeEachHandlers: (() => unknown)[]
   afterAllHandlers: (() => unknown)[]
@@ -38,10 +39,23 @@ interface Test {
 async function build (ctx: Context) {
   const originalFs = { ...fs }
   // @ts-ignore
-  ufs.use(memfs).use(originalFs)
-  ufs.unwatchFile = originalFs.unwatchFile
+  ufs.use(originalFs).use(memfs)
+  // Patch unionfs to write to memfs only
+  Object.assign(ufs, {
+    unwatchFile: originalFs.unwatchFile,
+    mkdir: memfs.mkdir,
+    mkdirSync: memfs.mkdirSync,
+    write: memfs.write,
+    writeFile: memfs.writeFile,
+    writeFileSync: memfs.writeFileSync,
+  })
   patchFs(ufs)
   patchRequire(ufs)
+
+  const targetDir = dirname(ctx.options.entry)
+
+  // Ensure target directory
+  memfs.mkdirSync(targetDir, { recursive: true })
 
   try {
     const time = Date.now()
@@ -62,7 +76,7 @@ async function build (ctx: Context) {
     })
 
     await bundle.write({
-      dir: join(dirname(ctx.options.entry), '/__output'),
+      dir: join(targetDir, '/__output'),
       entryFileNames: 'target.js',
       format: 'cjs',
       sourcemap: true,
@@ -85,6 +99,7 @@ function registerGlobals (ctx: Context) {
   (global as any).describe = (title: string, handler: () => unknown) => {
     currentSuite = {
       title,
+      filePath: ctx.options.entry,
       tests: [],
       beforeAllHandlers: [],
       beforeEachHandlers: [],
@@ -170,6 +185,17 @@ export async function runTestFile (options: RunTestFileOptions) {
     installSourceMap()
     require(join(dirname(ctx.options.entry), '/__output/target.js'))
     await runTests(ctx)
+    return {
+      suites: ctx.suites.map(s => ({
+        title: s.title,
+        filePath: s.filePath,
+        errors: s.errors,
+        tests: s.tests.map(t => ({
+          title: t.title,
+          error: t.error,
+        })),
+      })),
+    }
   } catch (e) {
     console.error(`Running tests failed: ${e.stack}`)
     throw e
