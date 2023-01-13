@@ -9,6 +9,7 @@
     "dev:server": "pnpm -C demo run dev:server",
     "dev:run": "pnpm -C demo run dev:run",
     "build": "pnpm -r --filter='./packages/**' run build",
+    "test":"pnpm -C tests run test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
