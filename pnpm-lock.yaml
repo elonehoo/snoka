@@ -121,8 +121,8 @@ importers:
 
   tests:
     specifiers:
-      '@snoka/cli': workspace:^0.0.0
-      '@snoka/runner': workspace:^0.0.0
+      '@snoka/cli': workspace:*
+      '@snoka/runner': workspace:*
     dependencies:
       '@snoka/cli': link:../packages/cli
       '@snoka/runner': link:../packages/runner
