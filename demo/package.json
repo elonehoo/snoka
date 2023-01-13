@@ -6,11 +6,14 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
-    "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/ --ignore demo/"
+    "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/ --ignore demo/",
+    "dev:runner": "ts-node ./src/test-runner.ts"
   },
   "dependencies": {
     "@snoka/cli": "workspace:*",
+    "@snoka/runner": "workspace:*",
     "@snoka/server": "workspace:*",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "ts-node": "^10.9.1"
   }
 }

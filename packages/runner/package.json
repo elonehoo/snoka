@@ -1,0 +1,34 @@
+{
+  "name": "@snoka/runner",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "module": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:fix": "esno scripts/postbuild.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/core": "^7.20.12",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@snoka/reactive": "workspace:*",
+    "@types/sinon": "^10.0.13",
+    "fs-monkey": "^1.0.3",
+    "memfs": "^3.4.13",
+    "must": "^0.13.4",
+    "rollup": "^3.10.0",
+    "sinon": "^15.0.1",
+    "source-map-support": "^0.5.21",
+    "typescript": "^4.9.4",
+    "unionfs": "^4.4.0",
+    "workerpool": "^6.3.1"
+  }
+}
