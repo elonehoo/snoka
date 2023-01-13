@@ -1,21 +1,17 @@
 import { foo } from './foo'
 
-describe('this is a test suite :)', () => {
-  it('tests the foo function', () => {
+describe('yet another ts test suite', () => {
+  it('tests the foo function again', () => {
     expect(foo(42)).to.equal(84)
   })
 
-  it('meows', () => {
+  it('another meows', () => {
     expect('meow').to.equal('meow')
   })
 
-  it('test a function', () => {
+  it('this is a function spy', () => {
     const spy = sinon.fake()
     spy()
     expect(spy.callCount).to.equal(1)
-  })
-
-  it('error', () => {
-    expect(1).to.equal(2)
   })
 })

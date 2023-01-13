@@ -1,8 +1,10 @@
 import { join } from 'path'
 import type { Ref } from '@vue/reactivity'
 import { markRaw, ref } from '@vue/reactivity'
-import { existsSync, move, readFile, remove, writeFile } from 'fs-extra'
+import fs from 'fs-extra'
 import type { Context } from './context'
+
+const { existsSync, move, readFile, remove, writeFile } = fs
 
 export interface ReactiveFile {
   relativePath: string

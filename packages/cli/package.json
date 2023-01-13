@@ -7,10 +7,16 @@
   "license": "MIT",
   "keywords": [],
   "main": "./dist/index.js",
-  "module": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "bin": {
     "snoka": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
   },
   "files": [
     "dist"
@@ -20,6 +26,13 @@
     "build:fix": "esno scripts/postbuild.ts"
   },
   "dependencies": {
-    "commander": "^9.5.0"
+    "@snoka/runner": "workspace:*",
+    "@snoka/server": "workspace:*",
+    "commander": "^9.5.0",
+    "consola": "^2.15.3",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.191"
   }
 }

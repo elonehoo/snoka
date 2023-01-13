@@ -7,7 +7,6 @@
   "license": "MIT",
   "keywords": [],
   "main": "./dist/index.js",
-  "module": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
