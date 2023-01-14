@@ -2,7 +2,12 @@
 ### Do not make changes to this file directly
 
 
+input ClearRunInput {
+  id: ID!
+}
+
 type Mutation {
+  clearRun(input: ClearRunInput!): Run!
   startRun(input: StartRunInput!): Run!
 }
 
@@ -18,6 +23,7 @@ type Run {
   progress: Float!
   status: Status!
   testFiles: [TestFile!]!
+  testSuites: [TestSuite!]!
 }
 
 input StartRunInput {
@@ -32,16 +38,43 @@ enum Status {
 }
 
 type Subscription {
-  runAdded: TestFile!
-  runRemoved: TestFile!
-  runUpdated: TestFile!
+  runAdded: Run!
+  runRemoved: Run!
+  runUpdated: Run!
+  testAdded(runId: String!): Test!
   testFileAdded: TestFile!
   testFileRemoved: TestFile!
   testFileUpdated: TestFile!
+  testSuiteAdded(runId: String!): TestSuite!
+  testSuiteUpdated(runId: String!): TestSuite!
+  testUpdated(runId: String!): Test!
+}
+
+type Test {
+  duration: Int
+  error: TestError
+  id: ID!
+  status: Status!
+  title: String!
+}
+
+type TestError {
+  message: String!
+  stack: String
 }
 
 type TestFile {
-  id: ID
-  relativePath: String
-  status: Status
+  deleted: Boolean!
+  id: ID!
+  relativePath: String!
+  status: Status!
+}
+
+type TestSuite {
+  duration: Int
+  id: ID!
+  status: Status!
+  testFile: TestFile!
+  tests: [Test]!
+  title: String!
 }

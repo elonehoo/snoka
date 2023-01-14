@@ -1,12 +1,20 @@
 import { arg, extendType, idArg, inputObjectType, nonNull, objectType } from 'nexus'
 import shortid from 'shortid'
 import { setupRunner, getStats, EventType } from '@snoka/runner'
+import { join, relative } from 'path'
 import { Context } from '../context'
 import { Status, StatusEnum } from './Status'
 import { setTestFileStatus, TestFile, TestFileData, testFiles } from './TestFile'
+import { clearTestSuites, createTestSuite, updateTestSuite } from './TestSuite'
+import { updateTest } from './Test'
+import e from 'express'
 
 export const Run = objectType({
   name: 'Run',
+  sourceType: {
+    module: join(__dirname, '../../src/schema/Run.ts'),
+    export: 'RunData',
+  },
   definition (t) {
     t.nonNull.id('id')
     t.nonNull.float('progress')
@@ -184,7 +192,43 @@ export async function startRun (ctx: Context, id: string) {
     testFiles: ctx.reactiveFs,
   })
   runner.onEvent((eventType, payload) => {
-    // @TODO
+    if (eventType === EventType.SUITE_START) {
+      const { suite } = payload
+      createTestSuite(ctx, {
+        id: suite.id,
+        runId: run.id,
+        testFileId: relative(process.cwd(), suite.filePath),
+        title: suite.title,
+        tests: suite.tests,
+      })
+    } else if (eventType === EventType.SUITE_COMPLETED) {
+      const { suite, duration } = payload
+      updateTestSuite(ctx, suite.id, {
+        status: suite.errors ? 'error' : 'success',
+        duration,
+      })
+    } else if (eventType === EventType.TEST_START) {
+      const { suite, test } = payload
+      updateTest(ctx, suite.id, test.id, {
+        status: 'in_progress',
+      })
+    } else if (eventType === EventType.TEST_SUCCESS) {
+      const { suite, test, duration } = payload
+      updateTest(ctx, suite.id, test.id, {
+        status: 'success',
+        duration,
+      })
+    } else if (eventType === EventType.TEST_ERROR) {
+      const { suite, test, duration, error, stack } = payload
+      updateTest(ctx, suite.id, test.id, {
+        status: 'error',
+        duration,
+        error: {
+          message: error.message,
+          stack: stack,
+        },
+      })
+    }
   })
 
   let completed = 0
@@ -217,6 +261,7 @@ export async function clearRun (ctx: Context, id: string) {
   if (index !== -1) {
     runs.splice(index, 1)
   }
+  clearTestSuites(ctx, id)
   ctx.pubsub.publish(RunRemoved, {
     run,
   } as RunRemovedPayload)
