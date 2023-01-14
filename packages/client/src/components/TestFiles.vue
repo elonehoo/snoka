@@ -35,7 +35,32 @@ const filteredFiles = computed(() => {
     return testFiles.value.filter(f => reg.test(f.relativePath))
   }
 })
+// Sorting
+const sortedFiles = computed(() => filteredFiles.value.slice().sort(
+  (a, b) => a.relativePath.localeCompare(b.relativePath)
+))
 // Subscriptions
+// Test file added
+subscribeToMore({
+  document: gql`
+    subscription testFileAdded {
+      testFileAdded {
+        ...testFileList
+      }
+    }
+    ${testFileListFragment}
+  `,
+  updateQuery: (previousResult, { subscriptionData: { data } }) => {
+    if (previousResult.testFiles.find(f => f.id === data.testFileAdded.id)) return previousResult
+    return {
+      testFiles: [
+        ...previousResult.testFiles,
+        data.testFileAdded,
+      ],
+    }
+  },
+})
+// Test file updated
 subscribeToMore({
   document: gql`
     subscription testFileUpdated {
@@ -45,12 +70,21 @@ subscribeToMore({
     }
     ${testFileListFragment}
   `,
+})
+// Test file removed
+subscribeToMore({
+  document: gql`
+    subscription testFileRemoved {
+      testFileRemoved {
+        ...testFileList
+      }
+    }
+    ${testFileListFragment}
+  `,
   updateQuery: (previousResult, { subscriptionData: { data } }) => {
-    if (previousResult.testFiles.find(f => f.id === data.testFileUpdated.id)) return previousResult
     return {
       testFiles: [
-        ...previousResult.testFiles,
-        data.testFileUpdated,
+        ...previousResult.testFiles.filter(f => f.id !== data.testFileRemoved.id),
       ],
     }
   },
@@ -72,7 +106,7 @@ subscribeToMore({
     </div>
     <div class="flex-1 overflow-y-auto">
       <TestFileItem
-        v-for="file of filteredFiles"
+        v-for="file of sortedFiles"
         :key="file.id"
         :file="file"
       />
