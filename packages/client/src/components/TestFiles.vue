@@ -5,6 +5,7 @@ fragment testFileList on TestFile {
   id
   relativePath
   status
+  duration
   deleted
 }
 `
