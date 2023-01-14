@@ -1,12 +1,12 @@
-import { startStandaloneServer } from '@apollo/server/standalone'
+import consola from 'consola'
 import { createServer } from '.'
 
-const server = createServer()
-
-startStandaloneServer(server, {
-  context: async () => {
-    return process.env.PORT || 4000
-  },
-}).then((res) => {
-  console.log(`🚀 Server ready at ${res.url}`)
-})
+(async () => {
+  const {
+    http,
+  } = await createServer()
+  const port = process.env.PORT || 4000
+  http.listen(port, () => {
+    consola.success(`🚀 Server ready at http://localhost:${port}`)
+  })
+})()
