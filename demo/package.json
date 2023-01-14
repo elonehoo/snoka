@@ -7,7 +7,7 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
-    "dev:server": "nodemon ../peeky-server/dist/standalone.js --watch .. --delay 200ms -e js --ignore tests/ --ignore demo/",
+    "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/ --ignore demo/",
     "dev:run": "snoka run"
   },
   "dependencies": {
