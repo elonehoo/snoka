@@ -1,0 +1,32 @@
+{
+  "name": "@snoka/client",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "dev":"vite",
+    "build":"vite build"
+  },
+  "keywords": [],
+  "author": "Elone Hoo <hi@elonehoo.me>",
+  "license": "MIT",
+  "dependencies": {
+    "@apollo/client": "^3.7.4",
+    "@vue/apollo-composable": "4.0.0-beta.1",
+    "@zhuowenli/vue-feather-icons": "^5.0.2",
+    "graphql": "^15.4.0",
+    "graphql-tag": "^2.12.6",
+    "vue": "^3.2.45",
+    "vue-router": "^4.1.6"
+  },
+  "devDependencies": {
+    "@types/vue-feather-icons": "^5.0.4",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "@vue/compiler-sfc": "^3.2.45",
+    "@vuedx/typecheck": "^0.7.6",
+    "@vuedx/typescript-plugin-vue": "^0.7.6",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4",
+    "vite": "^4.0.4"
+  }
+}
