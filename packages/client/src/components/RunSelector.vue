@@ -29,7 +29,7 @@ const runs = useResult(result, [], data => data.runs.slice().reverse())
 // Updated
 subscribeToMore({
   document: gql`
-  subscription runUpdated {
+  subscription runUpdatedForRunSelector {
     runUpdated {
       id
       status
@@ -41,7 +41,7 @@ subscribeToMore({
 // Added
 subscribeToMore({
   document: gql`
-  subscription runAdded {
+  subscription runAddedForRunSelector {
     runAdded {
       ...runList
     }

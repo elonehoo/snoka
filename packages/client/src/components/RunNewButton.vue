@@ -5,7 +5,7 @@ import { useMutation, useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { computed } from 'vue'
 const { result } = useQuery(gql`
-  query lastRun {
+  query lastRunNewButton {
     lastRun {
       id
       status
