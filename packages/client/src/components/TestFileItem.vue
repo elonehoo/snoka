@@ -14,7 +14,7 @@ const props = defineProps({
         slug: props.file?.slug,
       },
     }"
-    class="px-3 flex items-center hover:bg-gray-50 dark:hover:bg-gray-900 space-x-2"
+    class="px-3 flex items-center hover:bg-gray-50 dark:hover:bg-gray-900 space-x-2 h-8"
   >
     <StatusIcon
       :status="props.file?.status"
