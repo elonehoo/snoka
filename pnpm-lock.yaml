@@ -157,6 +157,7 @@ importers:
       graphql: ^15.4.0
       nexus: ^1.3.0
       project-name-generator: ^2.1.9
+      random-emoji: ^1.0.2
       shortid: ^2.2.16
     dependencies:
       '@snoka/reactive': link:../reactive
@@ -167,6 +168,7 @@ importers:
       graphql: 15.8.0
       nexus: 1.3.0_graphql@15.8.0
       project-name-generator: 2.1.9
+      random-emoji: 1.0.2
       shortid: 2.2.16
     devDependencies:
       '@types/shortid': 0.0.29
@@ -2622,6 +2624,11 @@ packages:
   /electron-to-chromium/1.4.284:
     resolution: {integrity: sha512-M8WEXFuKXMYMVr45fo8mq0wUrrJHheiKZf6BArTKk9ZBYCKJEOU5H8cdWgDT+qCVZf7Na4lVUaZsA+h6uA9+PA==}
 
+  /emoji-named-characters/1.0.2:
+    resolution: {integrity: sha512-F9uKjyRsj7qjqZh7yjgHYa7XCgJgGI+nHTUqxkq/TDGuq0wLFbUX0wNes3XC6OA2j2Uu8PaeZD6hvCu5eO3lTA==}
+    deprecated: This package is no longer maintained
+    dev: false
+
   /emoji-regex/8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
     dev: true
@@ -4217,6 +4224,10 @@ packages:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
 
+  /lodash.shuffle/4.2.0:
+    resolution: {integrity: sha512-V/rTAABKLFjoecTZjKSv+A1ZomG8hZg8hlgeG6wwQVD9AGv+10zqqSf6mFq2tVA703Zd5R0YhSuSlXA+E/Ei+Q==}
+    dev: false
+
   /lodash.sortby/4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
 
@@ -4896,6 +4907,14 @@ packages:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
     dev: true
+
+  /random-emoji/1.0.2:
+    resolution: {integrity: sha512-eyk84bFq1aw/wzW4RwzmKgZ8iqtzoGmkAVtLZsPPwwdQnlj7DE/qfSezoJHmvZpNHhU5zw9mcXrUbGS+g8cgFg==}
+    deprecated: This package is no longer maintained
+    dependencies:
+      emoji-named-characters: 1.0.2
+      lodash.shuffle: 4.2.0
+    dev: false
 
   /range-parser/1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
