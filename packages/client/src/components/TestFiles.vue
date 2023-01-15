@@ -3,6 +3,7 @@ import gql from 'graphql-tag'
 export const runTestFileListFragment = gql`
 fragment runTestFileList on RunTestFile {
   id
+  slug
   status
   duration
   buildDuration
@@ -23,7 +24,7 @@ import { computed, ref } from 'vue'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import { useRoute } from 'vue-router'
 const route = useRoute()
-const { result, subscribeToMore } = useQuery(() => route.params.runId ? gql`
+const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-run' ? gql`
   query runTestFilesSpecific ($id: ID!) {
     run (id: $id) {
       id
@@ -43,7 +44,7 @@ const { result, subscribeToMore } = useQuery(() => route.params.runId ? gql`
     }
   }
   ${runTestFileListFragment}
-`, () => route.params.runId ? {
+`, () => route.params.runId !== 'last-run' ? {
   id: route.params.runId,
 } : {})
 const testFiles = useResult(result, [], data => data.run.runTestFiles)

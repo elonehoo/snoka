@@ -7,7 +7,15 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="px-3 flex items-center hover:bg-gray-50 dark:hover:bg-gray-900 space-x-2">
+  <router-link
+    :to="{
+      name: 'run-test-file',
+      params: {
+        slug: props.file?.slug,
+      },
+    }"
+    class="px-3 flex items-center hover:bg-gray-50 dark:hover:bg-gray-900 space-x-2"
+  >
     <StatusIcon
       :status="props.file?.status"
       class="w-4 h-4"
@@ -21,5 +29,11 @@ const props = defineProps({
     >
       {{ props.file?.duration }}ms
     </span>
-  </div>
+  </router-link>
 </template>
+
+<style scoped>
+.router-link-active {
+  @apply bg-purple-50 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
+}
+</style>
