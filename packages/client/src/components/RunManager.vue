@@ -2,7 +2,7 @@
 import RunSelector from './RunSelector.vue'
 import BaseButton from './BaseButton.vue'
 import RunNewButton from './RunNewButton.vue'
-import StatusIcon from './StatusIcon.vue'
+import RunItem from './RunItem.vue'
 import { ChevronDownIcon } from '@zhuowenli/vue-feather-icons'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
@@ -16,6 +16,7 @@ fragment runDetails on Run {
   emoji
   status
   progress
+  duration
 }
 `
 const route = useRoute()
@@ -47,6 +48,7 @@ subscribeToMore({
       id
       status
       progress
+      duration
     }
   }
   `,
@@ -83,17 +85,14 @@ subscribeToMore({
       }"
     />
 
-    <div class="relative flex-1 w-0 truncate px-3 py-2 flex items-center space-x-1">
+    <div class="relative flex-1 w-0 truncate">
       <template v-if="currentRun">
-        <StatusIcon
-          :status="currentRun.status"
-          class="w-4 h-4 mr-1"
+        <RunItem
+          :run="currentRun"
         />
-        <span>{{ currentRun.title }}</span>
-        <span>{{ currentRun.emoji }}</span>
       </template>
       <template v-else>
-        <span class="text-gray-500">No run found here</span>
+        <span class="text-gray-500 px-3 py-2">No run found here</span>
       </template>
     </div>
 
@@ -108,9 +107,11 @@ subscribeToMore({
     <RunNewButton class="flex-none" />
   </div>
 
-  <RunSelector
-    v-if="isSelectorOpen"
-    class="absolute inset-0 bg-white dark:bg-black z-10"
-    @close="isSelectorOpen = false"
-  />
+  <transition name="slide-from-left">
+    <RunSelector
+      v-if="isSelectorOpen"
+      class="absolute inset-0 bg-white dark:bg-black z-10"
+      @close="isSelectorOpen = false"
+    />
+  </transition>
 </template>

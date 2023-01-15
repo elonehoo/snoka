@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "dev":"vite",
-    "build":"vite build"
+    "dev": "vite",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "Elone Hoo <hi@elonehoo.me>",
@@ -15,6 +15,7 @@
     "@zhuowenli/vue-feather-icons": "^5.0.2",
     "graphql": "^15.4.0",
     "graphql-tag": "^2.12.6",
+    "postcss-nested": "^6.0.0",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },

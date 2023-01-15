@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import StatusIcon from './StatusIcon.vue'
+import RunItem from './RunItem.vue'
 import { RotateCcwIcon } from '@zhuowenli/vue-feather-icons'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
-import { watch } from 'vue'
+import {watch } from 'vue'
 import { useRoute } from 'vue-router'
 const emit = defineEmits()
 const runListFragment = gql`
@@ -12,6 +12,7 @@ fragment runList on Run {
   title
   emoji
   status
+  duration
 }
 `
 const { result, subscribeToMore } = useQuery(gql`
@@ -33,7 +34,7 @@ subscribeToMore({
     runUpdated {
       id
       status
-      progress
+      duration
     }
   }
   `,
@@ -108,14 +109,11 @@ watch(() => route.params.runId, () => {
           runId: run.id,
         },
       }"
-      class="flex-none truncate px-3 py-2 flex items-center space-x-1 hover:bg-purple-100 dark:hover:bg-purple-900"
+      class="flex-none hover:bg-purple-100 dark:hover:bg-purple-900"
     >
-      <StatusIcon
-        :status="run.status"
-        class="w-4 h-4 mr-1"
+      <RunItem
+        :run="run"
       />
-      <span>{{ run.title }}</span>
-      <span>{{ run.emoji }}</span>
     </router-link>
   </div>
 </template>
