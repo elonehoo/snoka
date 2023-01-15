@@ -26,9 +26,11 @@ export default defineComponent({
     function focus () {
       input.value?.focus()
     }
+    const focused = ref(false)
     return {
       input,
       focus,
+      focused,
     }
   },
 })
@@ -36,7 +38,7 @@ export default defineComponent({
 
 <template>
   <div
-    class="flex items-center focus-within:ring-2"
+    class="flex items-center relative"
     @click="focus()"
   >
     <slot name="before" />
@@ -50,8 +52,18 @@ export default defineComponent({
         'px-3 py-2': size === 'md',
       }"
       @input="$emit('update:modelValue', $event.target.value)"
+      @focus="focused = true"
+      @blur="focused = false"
     >
 
     <slot name="after" />
+
+    <!-- Focus indicator -->
+    <div
+      class="absolute bottom-0 left-0 w-full border-b border-purple-300 dark:border-purple-700 transition-all"
+      :class="{
+        'transform scale-x-0 opacity-0': !focused,
+      }"
+    />
   </div>
 </template>
