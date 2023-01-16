@@ -57,7 +57,11 @@ const searchReg = computed(() => searchText.value ? new RegExp(searchText.value,
 
     <template #last>
       <div class="h-full flex items-center justify-center text-4xl">
-        🐈️
+        <img
+          src="/logo.svg"
+          alt="Snoka logo"
+          class="max-w-32 opacity-25"
+        >
       </div>
     </template>
   </BaseSplitPane>
