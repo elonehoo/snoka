@@ -2,7 +2,10 @@ import sinon from 'sinon'
 import must from 'must'
 import shortid from 'shortid'
 import { Context, TestSuite } from './types'
+import { createSnokaGlobal } from './global'
+
 export function registerGlobals (ctx: Context, target: any) {
+  target.snoka = createSnokaGlobal(ctx)
   target.expect = must
   target.sinon = sinon
 
