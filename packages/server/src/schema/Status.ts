@@ -10,4 +10,4 @@ export const Status = enumType({
   ],
 })
 
-export type StatusEnum = 'idle' | 'in_progress' | 'success' | 'error'
+export type StatusEnum = 'idle' | 'in_progress' | 'success' | 'error' | 'skipped'

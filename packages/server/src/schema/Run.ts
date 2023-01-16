@@ -11,7 +11,6 @@ import { clearTestSuites, createTestSuite, updateTestSuite, testSuites } from '.
 import { updateTest } from './Test'
 import { RunTestFileData, updateRunTestFile } from './RunTestFile'
 import { getErrorPosition, getSrcFile } from '../util'
-
 export const Run = objectType({
   name: 'Run',
   sourceType: {
@@ -247,8 +246,9 @@ export async function startRun (ctx: Context, id: string) {
       })
     } else if (eventType === EventType.SUITE_COMPLETED) {
       const { suite, duration } = payload
+      const suiteData = testSuites.find(s => s.id === suite.id)
       updateTestSuite(ctx, suite.id, {
-        status: suite.errors ? 'error' : 'success',
+        status: !suiteData.tests.length ? 'skipped' : suite.errors ? 'error' : 'success',
         duration,
       })
     } else if (eventType === EventType.TEST_START) {
@@ -286,7 +286,7 @@ export async function startRun (ctx: Context, id: string) {
   const results = await Promise.all(run.runTestFiles.map(async f => {
     const result = await runner.runTestFile(f.testFile.relativePath)
     const stats = getStats([result])
-    const status = stats.errorTestCount > 0 ? 'error' : 'success'
+    const status: StatusEnum = !stats.testCount ? 'skipped' : stats.errorTestCount > 0 ? 'error' : 'success'
     await updateTestFile(ctx, f.testFile.id, {
       status,
       duration: result.duration,
