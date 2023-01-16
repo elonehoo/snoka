@@ -3,7 +3,7 @@ import RunItem from './RunItem.vue'
 import { RotateCcwIcon } from '@zhuowenli/vue-feather-icons'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
-import {watch } from 'vue'
+import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 const emit = defineEmits()
 const runListFragment = gql`
@@ -97,7 +97,7 @@ watch(() => route.params.runId, () => {
           runId: 'last-run',
         },
       }"
-      class="flex-none px-3 py-2 flex items-center hover:bg-purple-100 dark:hover:bg-purple-900"
+      class="flex-none px-3 h-10 flex items-center hover:bg-purple-100 dark:hover:bg-purple-900"
     >
       <RotateCcwIcon class="w-4 h-4 mr-2" />
       Last run
@@ -120,3 +120,9 @@ watch(() => route.params.runId, () => {
     </router-link>
   </div>
 </template>
+
+<style scoped>
+.router-link-active {
+  @apply bg-purple-50 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
+}
+</style>

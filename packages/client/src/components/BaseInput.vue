@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { computed, defineComponent, onMounted, ref } from 'vue'
 export default defineComponent({
   inheritAttrs: false,
   props: {
@@ -16,7 +16,7 @@ export default defineComponent({
   emits: [
     'update:modelValue',
   ],
-  setup (props) {
+  setup (props, { attrs }) {
     const input = ref<HTMLInputElement>()
     onMounted(() => {
       if (props.autoFocus) {
@@ -27,10 +27,15 @@ export default defineComponent({
       input.value?.focus()
     }
     const focused = ref(false)
+    const filteredAttrs = computed(() => {
+      const { class: _, ...other } = attrs
+      return other
+    })
     return {
       input,
       focus,
       focused,
+      filteredAttrs,
     }
   },
 })
@@ -39,6 +44,7 @@ export default defineComponent({
 <template>
   <div
     class="flex items-center relative"
+    :class="$attrs.class"
     @click="focus()"
   >
     <slot name="before" />
@@ -46,7 +52,7 @@ export default defineComponent({
     <input
       ref="input"
       :value="modelValue"
-      v-bind="$attrs"
+      v-bind="filteredAttrs"
       class="flex-1 w-0 h-full outline-none"
       :class="{
         'px-3 py-2': size === 'md',
