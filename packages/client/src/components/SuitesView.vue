@@ -9,6 +9,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  run: {
+    type: Object,
+    required: true,
+  },
 })
 const searchText = ref('')
 const searchReg = computed(() => searchText.value ? new RegExp(searchText.value, 'gi') : null)
@@ -44,6 +48,7 @@ const searchReg = computed(() => searchText.value ? new RegExp(searchText.value,
             v-for="suite of suites"
             :key="suite.id"
             :suite="suite"
+            :run="run"
             :search-reg="searchReg"
           />
         </div>

@@ -7,6 +7,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  run: {
+    type: Object,
+    required: true,
+  },
   searchReg: {
     type: RegExp,
     default: null,
@@ -43,6 +47,7 @@ const filteredTests = computed(() => {
         v-for="test of filteredTests"
         :key="test.id"
         :test="test"
+        :run="run"
       />
     </div>
   </div>

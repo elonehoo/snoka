@@ -10,6 +10,13 @@ fragment runTestFileAllSuite on TestSuite {
   title
   status
   duration
+  runTestFile {
+    id
+    testFile {
+      id
+      relativePath
+    }
+  }
   tests {
     id
     title
@@ -18,6 +25,8 @@ fragment runTestFileAllSuite on TestSuite {
     error {
       message
       stack
+      line
+      col
     }
   }
 }
@@ -80,7 +89,7 @@ onResult(({ data }) => {
     }))
     subscribeToMore(() => ({
       document: gql`
-      subscription testUpdatedToRunTestFileView ($runId: ID!) {
+      subscription testUpdatedToRunTestFileAllView ($runId: ID!) {
         testUpdated(runId: $runId) {
           id
           status
@@ -88,6 +97,8 @@ onResult(({ data }) => {
           error {
             message
             stack
+            line
+            col
           }
         }
       }
@@ -104,5 +115,6 @@ onResult(({ data }) => {
   <SuitesView
     v-if="run"
     :suites="run.testSuites"
+    :run="run"
   />
 </template>
