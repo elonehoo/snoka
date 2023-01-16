@@ -47,7 +47,7 @@ const filteredTests = computed(() => {
         v-for="test of filteredTests"
         :key="test.id"
         :test="test"
-        :run="run"
+        :suite="suite"
       />
     </div>
   </div>

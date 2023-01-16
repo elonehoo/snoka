@@ -1,16 +1,13 @@
+import { markRaw, ref, Ref } from '@vue/reactivity'
+import { existsSync, move, readFile, remove, writeFile } from 'fs-extra'
 import { join } from 'path'
-import type { Ref } from '@vue/reactivity'
-import { markRaw, ref } from '@vue/reactivity'
-import fs from 'fs-extra'
-import type { Context } from './context'
-
-const { existsSync, move, readFile, remove, writeFile } = fs
+import { Context } from './context'
 
 export interface ReactiveFile {
   relativePath: string
   absolutePath: string
   time: number
-  content: string
+  content: string | Promise<string>
   refresh: () => void
   remove: () => void
   move: (newRelativePath: string) => void
@@ -21,36 +18,35 @@ interface InternalFile {
   content: Ref<string>
 }
 
-export function createReactiveFile(ctx: Context, relativePath: string) {
+export function createReactiveFile (ctx: Context, relativePath: string) {
   const file: ReactiveFile & {
     _internal: InternalFile
   } = markRaw({
     relativePath,
     absolutePath: join(ctx.options.baseDir, relativePath),
     time: Date.now(),
-    get content() {
-      if (!file._internal.active)
-        activate()
-
+    get content () {
+      if (!file._internal.active) {
+        return activate()
+      }
       return file._internal.content.value
     },
-    set content(value) {
+    set content (value) {
       setContent(value)
-      queueFsOp(ctx, writeFile(file.absolutePath, value, 'utf8'))
+      queueFsOp(ctx, writeFile(file.absolutePath, value.toString(), 'utf8'))
     },
-    refresh() {
+    refresh () {
       read()
     },
-    remove() {
+    remove () {
       if (ctx.state.files[file.relativePath]) {
         delete ctx.state.files[file.relativePath]
         queueFsOp(ctx, remove(file.absolutePath))
       }
     },
-    move(newRelativePath) {
+    move (newRelativePath) {
       const oldRelativePath = file.relativePath
-      if (oldRelativePath === newRelativePath)
-        return
+      if (oldRelativePath === newRelativePath) return
       file.relativePath = newRelativePath
       const oldAbsolutePath = file.absolutePath
       file.absolutePath = join(ctx.options.baseDir, newRelativePath)
@@ -66,25 +62,31 @@ export function createReactiveFile(ctx: Context, relativePath: string) {
     },
   })
 
-  function activate() {
-    if (file._internal.active)
-      return
+  function activate (): Promise<string> {
+    if (file._internal.active) return readPromise || Promise.resolve(null)
     file._internal.active = true
-    read()
+    return read()
   }
 
-  function read() {
+  let readPromise: Promise<string>
+
+  function read (): Promise<string> {
     if (file._internal.active) {
-      queueFsOp(ctx, (async () => {
-        if (existsSync(file.absolutePath)) {
-          const result = await readFile(file.absolutePath, 'utf8')
-          setContent(result)
-        }
-      })())
+      readPromise = new Promise(resolve => {
+        queueFsOp(ctx, (async () => {
+          if (existsSync(file.absolutePath)) {
+            const result = await readFile(file.absolutePath, 'utf8')
+            setContent(result)
+            resolve(result)
+          }
+        })())
+      })
+      return readPromise
     }
+    return Promise.resolve(null)
   }
 
-  function setContent(value) {
+  function setContent (value) {
     if (value !== file._internal.content.value) {
       file.time = Date.now()
       file._internal.content.value = value
@@ -96,12 +98,11 @@ export function createReactiveFile(ctx: Context, relativePath: string) {
   return file as ReactiveFile
 }
 
-function queueFsOp(ctx: Context, op: Promise<unknown>) {
+function queueFsOp (ctx: Context, op: Promise<unknown>) {
   ctx.fsQueue.push(op)
-  return op.then((result) => {
+  return op.then(result => {
     const index = ctx.fsQueue.indexOf(op)
-    if (index !== -1)
-      ctx.fsQueue.splice(index, 1)
+    if (index !== -1) ctx.fsQueue.splice(index, 1)
     return result
   })
 }

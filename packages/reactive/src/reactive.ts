@@ -31,7 +31,7 @@ export async function createReactiveFileSystem(options: ReactiveFileSystemOption
     const e = effect(() => {
       const value = ctx.state.files[relativePath]?.content
       if (value !== oldValue) {
-        handler(value, oldValue)
+        handler(value.toString(), oldValue)
         oldValue = value
       }
     })
