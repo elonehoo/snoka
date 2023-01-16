@@ -15,6 +15,7 @@
     "@akryum/workerpool": "6.0.5-alpha.2",
     "@babel/core": "^7.20.12",
     "@snoka/reactive": "workspace:*",
+    "@snoka/utils": "workspace:*",
     "@types/chalk": "^2.2.0",
     "chalk": "4.1.2",
     "consola": "^2.15.3",

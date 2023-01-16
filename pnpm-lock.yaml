@@ -6,7 +6,7 @@ importers:
     specifiers:
       '@antfu/eslint-config': ^0.34.1
       '@types/node': ^18.11.18
-      chalk: ^5.2.0
+      chalk: ^4.1.2
       eslint: ^8.31.0
       esno: ^0.16.3
       fast-glob: ^3.2.12
@@ -15,7 +15,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config': 0.34.1_iukboom6ndih5an6iafl45j2fe
       '@types/node': 18.11.18
-      chalk: 5.2.0
+      chalk: 4.1.2
       eslint: 8.31.0
       esno: 0.16.3
       fast-glob: 3.2.12
@@ -110,6 +110,7 @@ importers:
       '@akryum/workerpool': 6.0.5-alpha.2
       '@babel/core': ^7.20.12
       '@snoka/reactive': workspace:*
+      '@snoka/utils': workspace:^0.0.0
       '@types/chalk': ^2.2.0
       '@types/shortid': ^0.0.29
       '@types/sinon': ^10.0.13
@@ -130,6 +131,7 @@ importers:
       '@akryum/workerpool': 6.0.5-alpha.2
       '@babel/core': 7.20.12
       '@snoka/reactive': link:../reactive
+      '@snoka/utils': link:../utils
       '@types/chalk': 2.2.0
       chalk: 4.1.2
       consola: 2.15.3
@@ -176,6 +178,25 @@ importers:
       shortid: 2.2.16
     devDependencies:
       '@types/shortid': 0.0.29
+
+  packages/utils:
+    specifiers:
+      '@types/node': ^18.11.18
+      chalk: 4.1.2
+      consola: ^2.15.3
+      esbuild: ^0.8.34
+      merge-source-map: ^1.1.0
+      rollup: ^3.10.0
+      typescript: ^4.9.4
+    dependencies:
+      chalk: 4.1.2
+      consola: 2.15.3
+      esbuild: 0.8.34
+      merge-source-map: 1.1.0
+      rollup: 3.10.0
+      typescript: 4.9.4
+    devDependencies:
+      '@types/node': 18.11.18
 
   tests:
     specifiers:
@@ -2268,6 +2289,7 @@ packages:
   /chalk/5.2.0:
     resolution: {integrity: sha512-ree3Gqw/nazQAPuJJEy+avdl7QfZMcUvmHIKgEZkGL+xOBzRvup5Hxo6LHuMceSxOabuJLJm5Yp/92R9eMmMvA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+    dev: false
 
   /character-entities-legacy/1.1.4:
     resolution: {integrity: sha512-3Xnr+7ZFS1uxeiUDvV02wQ+QDbc55o97tIV5zHScSPJpcLm/r0DFPcoY3tYRp+VZukxuMeKgXYmsXQHO05zQeA==}
@@ -2958,6 +2980,12 @@ packages:
       '@esbuild/win32-arm64': 0.16.17
       '@esbuild/win32-ia32': 0.16.17
       '@esbuild/win32-x64': 0.16.17
+
+  /esbuild/0.8.34:
+    resolution: {integrity: sha512-tnr0V1ooakYr1aRLXQLzCn2GVG1kBTW3FWpRyC+NgrR3ntsouVpJOlTOV0BS4YLATx3/c+x3h/uBq9lWJlUAtQ==}
+    hasBin: true
+    requiresBuild: true
+    dev: false
 
   /escalade/3.1.1:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
@@ -4328,6 +4356,12 @@ packages:
 
   /merge-descriptors/1.0.1:
     resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
+    dev: false
+
+  /merge-source-map/1.1.0:
+    resolution: {integrity: sha512-Qkcp7P2ygktpMPh2mCQZaf3jhN6D3Z/qVZHSdWvQ+2Ef5HgRAPBO57A77+ENm0CPx2+1Ce/MYKi3ymqdfuqibw==}
+    dependencies:
+      source-map: 0.6.1
     dev: false
 
   /merge-stream/2.0.0:

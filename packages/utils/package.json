@@ -1,0 +1,36 @@
+{
+  "name": "@snoka/utils",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "module": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:fix": "esno scripts/postbuild.ts"
+  },
+  "keywords": [],
+  "author": "Elone Hoo <hi@elonehoo.me>",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "4.1.2",
+    "consola": "^2.15.3",
+    "esbuild": "^0.8.34",
+    "merge-source-map": "^1.1.0",
+    "rollup": "^3.10.0",
+    "typescript": "^4.9.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18"
+  }
+}

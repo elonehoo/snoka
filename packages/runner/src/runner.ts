@@ -1,11 +1,11 @@
 import { join, relative } from 'path'
 import workerpool from '@akryum/workerpool'
+import { Awaited } from '@snoka/utils'
 import { ReactiveFileSystem } from '@snoka/reactive'
 import type { runTestFile as rawRunTestFile } from './run-test-file'
 import consola from 'consola'
 import chalk from 'chalk'
 import { RunTestFileOptions, TestSuiteInfo, EventType } from './types'
-import { Awaited } from './util'
 
 export interface RunnerOptions {
   targetDirectory: string
