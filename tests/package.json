@@ -3,13 +3,18 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "test":"snoka run"
+    "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/ --ignore demo/",
+    "test": "snoka run"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "@snoka/cli": "workspace:*",
-    "@snoka/runner": "workspace:*"
+    "@snoka/reactive": "workspace:^0.0.0",
+    "@snoka/runner": "workspace:*",
+    "@snoka/server": "workspace:^0.0.0",
+    "@snoka/utils": "workspace:^0.0.0",
+    "nodemon": "^2.0.20"
   }
 }

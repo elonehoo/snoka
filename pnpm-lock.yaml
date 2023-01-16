@@ -201,10 +201,18 @@ importers:
   tests:
     specifiers:
       '@snoka/cli': workspace:*
+      '@snoka/reactive': workspace:^0.0.0
       '@snoka/runner': workspace:*
+      '@snoka/server': workspace:^0.0.0
+      '@snoka/utils': workspace:^0.0.0
+      nodemon: ^2.0.20
     dependencies:
       '@snoka/cli': link:../packages/cli
+      '@snoka/reactive': link:../packages/reactive
       '@snoka/runner': link:../packages/runner
+      '@snoka/server': link:../packages/server
+      '@snoka/utils': link:../packages/utils
+      nodemon: 2.0.20
 
 packages:
 
