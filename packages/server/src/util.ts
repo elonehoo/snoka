@@ -1,12 +1,12 @@
-import consola from 'consola'
 import { basename } from 'path'
-import { RunTestFileData } from './schema'
+import consola from 'consola'
+import type { RunTestFileData } from './schema'
 
-export function getSrcFile (path: string) {
+export function getSrcFile(path: string) {
   return path.replace('dist', 'src').replace('js', 'ts')
 }
 
-export function getErrorPosition (filePath: string, stack: string) {
+export function getErrorPosition(filePath: string, stack: string) {
   const result = new RegExp(`${filePath}:(\\d+):(\\d+)`).exec(stack)
   if (result) {
     const [_, line, col] = result
@@ -14,7 +14,8 @@ export function getErrorPosition (filePath: string, stack: string) {
       line: parseInt(line),
       col: parseInt(col),
     }
-  } else {
+  }
+  else {
     consola.warn(`Couldn't get position from error: ${stack}`)
     return {
       line: 1,
@@ -23,7 +24,7 @@ export function getErrorPosition (filePath: string, stack: string) {
   }
 }
 
-export function formatRunTestFileErrorMessage (e: Error, runTestFile: RunTestFileData) {
+export function formatRunTestFileErrorMessage(e: Error, runTestFile: RunTestFileData) {
   let { message } = e
   message = message.replace(/__output.js/, basename(runTestFile.testFile.relativePath))
   return message

@@ -15,7 +15,7 @@ export const defaultRunTestsOptions: Partial<RunAllTestsOptions> = {
   ignored: ['node_modules'],
 }
 
-export async function runAllTests (options: RunAllTestsOptions) {
+export async function runAllTests(options: RunAllTestsOptions) {
   options = Object.assign({}, defaultRunTestsOptions, options)
 
   const fsTime = Date.now()

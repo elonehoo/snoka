@@ -1,7 +1,7 @@
-import { Context } from '../types'
+import type { Context } from '../types'
 import { retry } from './test-flow'
 
-export function createSnokaGlobal (ctx: Context) {
+export function createSnokaGlobal(ctx: Context) {
   return {
     retry,
   }

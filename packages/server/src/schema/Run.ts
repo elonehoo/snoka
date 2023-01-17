@@ -1,17 +1,18 @@
+import { relative } from 'path'
 import { arg, extendType, idArg, inputObjectType, nonNull, objectType } from 'nexus'
 import shortid from 'shortid'
-import { setupRunner, getStats, EventType } from '@snoka/runner'
-import { relative } from 'path'
+import { EventType, getStats, setupRunner } from '@snoka/runner'
 import nameGenerator from 'project-name-generator'
 import randomEmoji from 'random-emoji'
-import { Context } from '../context'
-import { Status, StatusEnum } from './Status'
-import { updateTestFile, testFiles } from './TestFile'
-import { clearTestSuites, createTestSuite, updateTestSuite, testSuites } from './TestSuite'
+import type { Context } from '../context'
+import { formatRunTestFileErrorMessage, getErrorPosition, getSrcFile } from '../util'
+import type { StatusEnum } from './Status'
+import { Status } from './Status'
+import { testFiles, updateTestFile } from './TestFile'
+import { clearTestSuites, createTestSuite, testSuites, updateTestSuite } from './TestSuite'
 import { updateTest } from './Test'
-import { RunTestFileData, updateRunTestFile } from './RunTestFile'
-import { getErrorPosition, getSrcFile, formatRunTestFileErrorMessage } from '../util'
-
+import type { RunTestFileData } from './RunTestFile'
+import { updateRunTestFile } from './RunTestFile'
 
 export const Run = objectType({
   name: 'Run',
@@ -19,7 +20,7 @@ export const Run = objectType({
     module: getSrcFile(__filename),
     export: 'RunData',
   },
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
     t.nonNull.string('title')
     t.nonNull.string('emoji')
@@ -33,7 +34,7 @@ export const Run = objectType({
 
 export const RunQuery = extendType({
   type: 'Query',
-  definition (t) {
+  definition(t) {
     t.nonNull.list.field('runs', {
       type: nonNull(Run),
       resolve: () => runs,
@@ -56,7 +57,7 @@ export const RunQuery = extendType({
 
 export const RunMutation = extendType({
   type: 'Mutation',
-  definition (t) {
+  definition(t) {
     t.nonNull.field('startRun', {
       type: Run,
       args: {
@@ -92,14 +93,14 @@ export const RunMutation = extendType({
 
 export const StartRunInput = inputObjectType({
   name: 'StartRunInput',
-  definition (t) {
+  definition(t) {
     t.list.nonNull.string('testFileIds')
   },
 })
 
 export const ClearRunInput = inputObjectType({
   name: 'ClearRunInput',
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
   },
 })
@@ -125,7 +126,7 @@ interface RunRemovedPayload {
 export const RunSubscription = extendType({
   type: 'Subscription',
 
-  definition (t) {
+  definition(t) {
     t.field('runAdded', {
       type: nonNull(Run),
       subscribe: (_, args, ctx) => ctx.pubsub.asyncIterator(RunAdded),
@@ -162,7 +163,7 @@ export interface CreateRunOptions {
   testFiles: string[]
 }
 
-export async function createRun (ctx: Context, options: CreateRunOptions) {
+export async function createRun(ctx: Context, options: CreateRunOptions) {
   const runId = shortid()
 
   const testFilesRaw = options.testFiles ? testFiles.filter(f => options.testFiles.includes(f.id)) : [...testFiles]
@@ -184,7 +185,7 @@ export async function createRun (ctx: Context, options: CreateRunOptions) {
     progress: 0,
     status: 'idle',
     duration: null,
-    runTestFiles: runTestFiles,
+    runTestFiles,
   }
   runs.push(run)
 
@@ -195,16 +196,15 @@ export async function createRun (ctx: Context, options: CreateRunOptions) {
   return run
 }
 
-export async function getRun (ctx: Context, id: string) {
+export async function getRun(ctx: Context, id: string) {
   const run = runs.find(r => r.id === id)
-  if (run) {
+  if (run)
     return run
-  } else {
+  else
     throw new Error(`Run ${id} not found`)
-  }
 }
 
-export async function updateRun (ctx: Context, id: string, data: Partial<Omit<RunData, 'id'>>) {
+export async function updateRun(ctx: Context, id: string, data: Partial<Omit<RunData, 'id'>>) {
   const run = await getRun(ctx, id)
   Object.assign(run, data)
   ctx.pubsub.publish(RunUpdated, {
@@ -213,10 +213,10 @@ export async function updateRun (ctx: Context, id: string, data: Partial<Omit<Ru
   return run
 }
 
-export async function startRun (ctx: Context, id: string) {
+export async function startRun(ctx: Context, id: string) {
   const run = await getRun(ctx, id)
 
-  await Promise.all(run.runTestFiles.map(async f => {
+  await Promise.all(run.runTestFiles.map(async (f) => {
     updateTestFile(ctx, f.testFile.id, { status: 'in_progress' })
     updateRunTestFile(ctx, run.id, f.id, { status: 'in_progress' })
   }))
@@ -237,7 +237,8 @@ export async function startRun (ctx: Context, id: string) {
       updateRunTestFile(ctx, run.id, runTestFileId, {
         buildDuration: duration,
       })
-    } else if (eventType === EventType.SUITE_START) {
+    }
+    else if (eventType === EventType.SUITE_START) {
       const { suite } = payload
       const testFileId = relative(ctx.config.targetDirectory, suite.filePath)
       createTestSuite(ctx, {
@@ -247,25 +248,29 @@ export async function startRun (ctx: Context, id: string) {
         title: suite.title,
         tests: suite.tests,
       })
-    } else if (eventType === EventType.SUITE_COMPLETED) {
+    }
+    else if (eventType === EventType.SUITE_COMPLETED) {
       const { suite, duration } = payload
       const suiteData = testSuites.find(s => s.id === suite.id)
       updateTestSuite(ctx, suite.id, {
         status: !suiteData.tests.length ? 'skipped' : suite.errors ? 'error' : 'success',
         duration,
       })
-    } else if (eventType === EventType.TEST_START) {
+    }
+    else if (eventType === EventType.TEST_START) {
       const { suite, test } = payload
       updateTest(ctx, suite.id, test.id, {
         status: 'in_progress',
       })
-    } else if (eventType === EventType.TEST_SUCCESS) {
+    }
+    else if (eventType === EventType.TEST_SUCCESS) {
       const { suite, test, duration } = payload
       updateTest(ctx, suite.id, test.id, {
         status: 'success',
         duration,
       })
-    } else if (eventType === EventType.TEST_ERROR) {
+    }
+    else if (eventType === EventType.TEST_ERROR) {
       const { suite, test, duration, error, stack } = payload
       const testFile = testSuites.find(s => s.id === suite.id).runTestFile.testFile
       const { line, col } = getErrorPosition(testFile.relativePath, stack)
@@ -275,7 +280,7 @@ export async function startRun (ctx: Context, id: string) {
         duration,
         error: {
           message: error.message,
-          stack: stack,
+          stack,
           snippet: lineSource.trim(),
           line,
           col,
@@ -287,7 +292,7 @@ export async function startRun (ctx: Context, id: string) {
   try {
     let completed = 0
 
-    const results = await Promise.all(run.runTestFiles.map(async f => {
+    const results = await Promise.all(run.runTestFiles.map(async (f) => {
       try {
         const result = await runner.runTestFile(f.testFile.relativePath)
         const stats = getStats([result])
@@ -305,7 +310,8 @@ export async function startRun (ctx: Context, id: string) {
           progress: completed / run.runTestFiles.length,
         })
         return result
-      } catch (e) {
+      }
+      catch (e) {
         e.message = formatRunTestFileErrorMessage(e, f)
         await updateTestFile(ctx, f.testFile.id, {
           status: 'error',
@@ -325,7 +331,8 @@ export async function startRun (ctx: Context, id: string) {
       status: stats.errorTestCount > 0 ? 'error' : 'success',
       duration: Date.now() - time,
     })
-  } catch (e) {
+  }
+  catch (e) {
     await updateRun(ctx, run.id, {
       status: 'error',
     })
@@ -334,15 +341,15 @@ export async function startRun (ctx: Context, id: string) {
   return run
 }
 
-export async function clearRun (ctx: Context, id: string) {
+export async function clearRun(ctx: Context, id: string) {
   const run = await getRun(ctx, id)
-  if (run.status === 'in_progress') {
+  if (run.status === 'in_progress')
     throw new Error(`Run ${id} is in progress and can't be cleared`)
-  }
+
   const index = runs.indexOf(run)
-  if (index !== -1) {
+  if (index !== -1)
     runs.splice(index, 1)
-  }
+
   clearTestSuites(ctx, id)
   ctx.pubsub.publish(RunRemoved, {
     run,
@@ -350,7 +357,7 @@ export async function clearRun (ctx: Context, id: string) {
   return run
 }
 
-export function clearRuns (ctx: Context) {
+export function clearRuns(ctx: Context) {
   clearTestSuites(ctx)
   runs = []
   return true

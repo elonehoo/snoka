@@ -1,10 +1,13 @@
 import { withFilter } from 'apollo-server-express'
 import { extendType, idArg, nonNull, objectType } from 'nexus'
-import { Context } from '../context'
+import type { Context } from '../context'
 import { getSrcFile } from '../util'
-import { RunTestFile, RunTestFileData } from './RunTestFile'
-import { Status, StatusEnum } from './Status'
-import { createTest, TestData } from './Test'
+import type { RunTestFileData } from './RunTestFile'
+import { RunTestFile } from './RunTestFile'
+import type { StatusEnum } from './Status'
+import { Status } from './Status'
+import type { TestData } from './Test'
+import { createTest } from './Test'
 
 export const TestSuite = objectType({
   name: 'TestSuite',
@@ -12,7 +15,7 @@ export const TestSuite = objectType({
     module: getSrcFile(__filename),
     export: 'TestSuiteData',
   },
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
     t.nonNull.string('title')
     t.nonNull.field('status', {
@@ -21,17 +24,17 @@ export const TestSuite = objectType({
     t.int('duration')
     t.nonNull.field('runTestFile', {
       type: RunTestFile,
-      resolve: (parent) => parent.runTestFile,
+      resolve: parent => parent.runTestFile,
     })
   },
 })
 
 export const TestSuiteExtendRun = extendType({
   type: 'Run',
-  definition (t) {
+  definition(t) {
     t.nonNull.list.field('testSuites', {
       type: nonNull(TestSuite),
-      resolve: (parent) => testSuites.filter(s => s.runId === parent.id),
+      resolve: parent => testSuites.filter(s => s.runId === parent.id),
     })
   },
 })
@@ -50,7 +53,7 @@ export interface TestSuiteUpdatedPayload {
 
 export const TestSuiteSubscriptions = extendType({
   type: 'Subscription',
-  definition (t) {
+  definition(t) {
     t.nonNull.field('testSuiteAdded', {
       type: TestSuite,
       args: {
@@ -102,7 +105,7 @@ export interface CreateTestSuiteOptions {
   }[]
 }
 
-export async function createTestSuite (ctx: Context, options: CreateTestSuiteOptions) {
+export async function createTestSuite(ctx: Context, options: CreateTestSuiteOptions) {
   const testSuite: TestSuiteData = {
     id: options.id,
     runId: options.runId,
@@ -125,15 +128,15 @@ export async function createTestSuite (ctx: Context, options: CreateTestSuiteOpt
   return testSuite
 }
 
-export function getTestSuite (ctx: Context, id: string) {
+export function getTestSuite(ctx: Context, id: string) {
   const testSuite = testSuites.find(s => s.id === id)
-  if (!testSuite) {
+  if (!testSuite)
     throw new Error(`Test suite ${id} not found`)
-  }
+
   return testSuite
 }
 
-export async function updateTestSuite (ctx: Context, id: string, data: Partial<Omit<TestSuiteData, 'id' | 'runId' | 'testFileId'>>) {
+export async function updateTestSuite(ctx: Context, id: string, data: Partial<Omit<TestSuiteData, 'id' | 'runId' | 'testFileId'>>) {
   const testSuite = await getTestSuite(ctx, id)
   Object.assign(testSuite, data)
   ctx.pubsub.publish(TestSuiteUpdated, {
@@ -142,6 +145,6 @@ export async function updateTestSuite (ctx: Context, id: string, data: Partial<O
   return testSuite
 }
 
-export function clearTestSuites (ctx: Context, runId: string = null) {
+export function clearTestSuites(ctx: Context, runId: string = null) {
   testSuites = runId ? testSuites.filter(s => s.runId !== runId) : []
 }

@@ -1,5 +1,4 @@
 /// <reference types="@snoka/runner"/>
-/* eslint-disable no-undef */
 
 describe('hello from vanilla js', () => {
   it('works', () => {

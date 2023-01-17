@@ -1,3 +1,3 @@
-export function foo (count) {
+export function foo(count) {
   return count + 42
 }

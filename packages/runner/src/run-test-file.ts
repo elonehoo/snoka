@@ -1,13 +1,14 @@
-import { install as installSourceMap } from 'source-map-support'
 import { dirname, join } from 'path'
+import { install as installSourceMap } from 'source-map-support'
 import consola from 'consola'
-import { Context, EventType, RunTestFileOptions, TestSuiteResult } from './types'
+import { workerEmit } from '@akryum/workerpool'
+import type { Context, RunTestFileOptions, TestSuiteResult } from './types'
+import { EventType } from './types'
 import { buildTestFile } from './build'
 import { registerGlobals } from './globals'
 import { runTests } from './run-tests'
-import { workerEmit } from '@akryum/workerpool'
 
-export async function runTestFile (options: RunTestFileOptions) {
+export async function runTestFile(options: RunTestFileOptions) {
   try {
     const ctx: Context = {
       options,
@@ -41,7 +42,8 @@ export async function runTestFile (options: RunTestFileOptions) {
       suites,
       duration,
     }
-  } catch (e) {
+  }
+  catch (e) {
     consola.error(`Running tests failed: ${e.stack}`)
     throw e
   }

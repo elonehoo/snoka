@@ -1,8 +1,9 @@
 import sinon from 'sinon'
 import { workerEmit } from '@akryum/workerpool'
-import { Context, EventType, TestSuiteInfo } from './types'
+import type { Context, TestSuiteInfo } from './types'
+import { EventType } from './types'
 
-export async function runTests (ctx: Context) {
+export async function runTests(ctx: Context) {
   for (const suite of ctx.suites) {
     workerEmit(EventType.SUITE_START, {
       suite: {
@@ -16,16 +17,14 @@ export async function runTests (ctx: Context) {
       } as TestSuiteInfo,
     })
     const suiteTime = Date.now()
-    for (const handler of suite.beforeAllHandlers) {
+    for (const handler of suite.beforeAllHandlers)
       await handler()
-    }
 
     for (const test of suite.tests) {
       sinon.restore()
 
-      for (const handler of suite.beforeEachHandlers) {
+      for (const handler of suite.beforeEachHandlers)
         await handler()
-      }
 
       const time = Date.now()
       workerEmit(EventType.TEST_START, {
@@ -47,7 +46,8 @@ export async function runTests (ctx: Context) {
           },
           duration: Date.now() - time,
         })
-      } catch (e) {
+      }
+      catch (e) {
         test.error = e
         const stackIndex = e.stack.search(/\s*at.*?(@peeky\/runner|peeky-runner)/)
         workerEmit(EventType.TEST_ERROR, {
@@ -64,14 +64,12 @@ export async function runTests (ctx: Context) {
         suite.errors++
       }
 
-      for (const handler of suite.afterEachHandlers) {
+      for (const handler of suite.afterEachHandlers)
         await handler()
-      }
     }
 
-    for (const handler of suite.afterAllHandlers) {
+    for (const handler of suite.afterAllHandlers)
       await handler()
-    }
 
     workerEmit(EventType.SUITE_COMPLETED, {
       suite: {

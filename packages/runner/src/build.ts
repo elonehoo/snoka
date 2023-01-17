@@ -1,21 +1,23 @@
+import fs from 'fs'
+import { dirname, join, relative } from 'path'
 import esbuild from 'rollup-plugin-esbuild'
 import { rollup } from 'rollup'
-import fs from 'fs'
 import { fs as memfs } from 'memfs'
 import { ufs } from 'unionfs'
 import { patchFs, patchRequire } from 'fs-monkey'
-import { dirname, join, relative } from 'path'
 import { workerEmit } from '@akryum/workerpool'
-import { Context, EventType } from './types'
+import type { Context } from './types'
+import { EventType } from './types'
 
 const originalFs = { ...fs }
 let mockedFs = false
 
-export function mockFileSystem () {
-  if (mockedFs) return
+export function mockFileSystem() {
+  if (mockedFs)
+    return
   mockedFs = true
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
+  // @ts-expect-error
   ufs.use(originalFs).use(memfs)
   // Patch unionfs to write to memfs only
   Object.assign(ufs, {
@@ -25,12 +27,12 @@ export function mockFileSystem () {
     write: memfs.write,
     writeFile: (path, ...args) => {
       memfs.mkdirpSync(dirname(path))
-      // @ts-ignore
+      // @ts-expect-error
       return memfs.writeFile(path, ...args)
     },
     writeFileSync: (path, ...args) => {
       memfs.mkdirpSync(dirname(path))
-      // @ts-ignore
+      // @ts-expect-error
       return memfs.writeFileSync(path, ...args)
     },
   })
@@ -38,7 +40,7 @@ export function mockFileSystem () {
   patchRequire(ufs)
 }
 
-export async function buildTestFile (ctx: Context) {
+export async function buildTestFile(ctx: Context) {
   mockFileSystem()
 
   const targetDir = dirname(ctx.options.entry)
@@ -85,7 +87,8 @@ export async function buildTestFile (ctx: Context) {
       testFilePath: ctx.options.entry,
       duration: Date.now() - time,
     })
-  } catch (e) {
+  }
+  catch (e) {
     workerEmit(EventType.BUILD_FAILED, {
       testFilePath: ctx.options.entry,
       error: e,
@@ -94,17 +97,18 @@ export async function buildTestFile (ctx: Context) {
   }
 }
 
-export function getCachePath (filePath: string) {
+export function getCachePath(filePath: string) {
   const cacheKey = relative(process.cwd(), filePath).replace(/(\/|\.)/g, '_')
-  return join(process.cwd(), 'node_modules', '.temp', 'peeky-build-cache', cacheKey + '.json')
+  return join(process.cwd(), 'node_modules', '.temp', 'peeky-build-cache', `${cacheKey}.json`)
 }
 
-export function loadBuildCache (ctx: Context, cachePath: string) {
+export function loadBuildCache(ctx: Context, cachePath: string) {
   let cache
   if (fs.existsSync(cachePath)) {
     try {
       cache = JSON.parse(fs.readFileSync(cachePath, 'utf8'))
-    } catch (e) {
+    }
+    catch (e) {
       workerEmit(EventType.CACHE_LOAD_FAILED, {
         filePath: ctx.options.entry,
         error: e,
@@ -115,7 +119,7 @@ export function loadBuildCache (ctx: Context, cachePath: string) {
   return cache
 }
 
-export function saveBuildCache (ctx: Context, cachePath: string, cacheData: any) {
+export function saveBuildCache(ctx: Context, cachePath: string, cacheData: any) {
   try {
     originalFs.mkdirSync(dirname(cachePath), {
       recursive: true,
@@ -125,7 +129,8 @@ export function saveBuildCache (ctx: Context, cachePath: string, cacheData: any)
       filePath: ctx.options.entry,
       cachePath,
     })
-  } catch (e) {
+  }
+  catch (e) {
     workerEmit(EventType.CACHE_SAVE_FAILED, {
       filePath: ctx.options.entry,
       error: e,

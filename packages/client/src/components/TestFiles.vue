@@ -1,5 +1,14 @@
 <script lang="ts">
 import gql from 'graphql-tag'
+</script>
+
+<script lang="ts" setup>
+import { SearchIcon } from '@zhuowenli/vue-feather-icons'
+import { computed, ref } from 'vue'
+import { useQuery, useResult } from '@vue/apollo-composable'
+import { useRoute } from 'vue-router'
+import BaseInput from './BaseInput.vue'
+import TestFileItem from './TestFileItem.vue'
 export const runTestFileListFragment = gql`
 fragment runTestFileList on RunTestFile {
   id
@@ -14,17 +23,9 @@ fragment runTestFileList on RunTestFile {
   }
 }
 `
-</script>
-
-<script lang="ts" setup>
-import BaseInput from './BaseInput.vue'
-import TestFileItem from './TestFileItem.vue'
-import { SearchIcon } from '@zhuowenli/vue-feather-icons'
-import { computed, ref } from 'vue'
-import { useQuery, useResult } from '@vue/apollo-composable'
-import { useRoute } from 'vue-router'
 const route = useRoute()
-const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-run' ? gql`
+const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-run'
+  ? gql`
   query runTestFilesSpecific ($id: ID!) {
     run (id: $id) {
       id
@@ -34,7 +35,8 @@ const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-
     }
   }
   ${runTestFileListFragment}
-` : gql`
+`
+  : gql`
   query runTestFilesLastRun {
     run: lastRun {
       id
@@ -44,23 +46,26 @@ const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-
     }
   }
   ${runTestFileListFragment}
-`, () => route.params.runId !== 'last-run' ? {
-  id: route.params.runId,
-} : {})
+`, () => route.params.runId !== 'last-run'
+  ? {
+      id: route.params.runId,
+    }
+  : {})
 const testFiles = useResult(result, [], data => data.run.runTestFiles)
 // Filtering
 const searchText = ref('')
 const filteredFiles = computed(() => {
   if (!searchText.value) {
     return testFiles.value
-  } else {
+  }
+  else {
     const reg = new RegExp(searchText.value, 'i')
     return testFiles.value.filter(f => f.testFile.relativePath.search(reg) !== -1)
   }
 })
 // Sorting
 const sortedFiles = computed(() => filteredFiles.value.slice().sort(
-  (a, b) => a.testFile.relativePath.localeCompare(b.testFile.relativePath)
+  (a, b) => a.testFile.relativePath.localeCompare(b.testFile.relativePath),
 ))
 // Subscriptions
 // Test file updated

@@ -1,4 +1,4 @@
-import { SnokaConfig } from './types'
+import type { SnokaConfig } from './types'
 
 export const snokaConfigFileMatch = ['**/snoka.config.(js|ts)']
 

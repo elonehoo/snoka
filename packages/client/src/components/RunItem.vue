@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import StatusIcon from './StatusIcon.vue'
 import { defineProps } from 'vue'
+import StatusIcon from './StatusIcon.vue'
 const props = defineProps({
   run: {
     type: Object,

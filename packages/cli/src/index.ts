@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
 import { runAllTests } from '@snoka/runner'
-import lodash from 'lodash';
+import lodash from 'lodash'
 import consola from 'consola'
 
-const { pick } = lodash;
+const { pick } = lodash
 
 const program = new Command()
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -28,7 +28,8 @@ program.command('run')
         e.stack = e.message
         throw e
       }
-    } catch (e) {
+    }
+    catch (e) {
       consola.error(e)
       process.exit(1)
     }

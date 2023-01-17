@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import StatusIcon from './StatusIcon.vue'
 import { FileIcon } from '@zhuowenli/vue-feather-icons'
 import { defineProps } from 'vue'
+import StatusIcon from './StatusIcon.vue'
 const props = defineProps({
   file: Object,
 })

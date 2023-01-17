@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import RunSelector from './RunSelector.vue'
-import BaseButton from './BaseButton.vue'
-import RunNewButton from './RunNewButton.vue'
-import RunItem from './RunItem.vue'
-import { LayersIcon, ActivityIcon } from '@zhuowenli/vue-feather-icons'
+import { ActivityIcon, LayersIcon } from '@zhuowenli/vue-feather-icons'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
+import RunItem from './RunItem.vue'
+import RunNewButton from './RunNewButton.vue'
+import BaseButton from './BaseButton.vue'
+import RunSelector from './RunSelector.vue'
 // Current run
 const runDetailsFragment = gql`
 fragment runDetails on Run {
@@ -20,23 +20,27 @@ fragment runDetails on Run {
 }
 `
 const route = useRoute()
-const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-run' ? gql`
+const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-run'
+  ? gql`
   query run ($id: ID!) {
     run (id: $id) {
       ...runDetails
     }
   }
   ${runDetailsFragment}
-` : gql`
+`
+  : gql`
   query lastRun {
     lastRun {
       ...runDetails
     }
   }
   ${runDetailsFragment}
-`, () => route.params.runId !== 'last-run' ? {
-  id: route.params.runId,
-} : {})
+`, () => route.params.runId !== 'last-run'
+  ? {
+      id: route.params.runId,
+    }
+  : {})
 const currentRun = useResult(result)
 const isSelectorOpen = ref(false)
 // Subs
@@ -66,7 +70,8 @@ subscribeToMore({
   updateQuery: (previousResult, { subscriptionData: { data } }) => {
     if (route.params.runId) {
       return previousResult
-    } else {
+    }
+    else {
       return {
         lastRun: data.runAdded,
       }

@@ -2,13 +2,13 @@
   "name": "@snoka/client",
   "version": "0.0.0",
   "description": "",
+  "author": "Elone Hoo <hi@elonehoo.me>",
+  "license": "MIT",
+  "keywords": [],
   "scripts": {
     "dev": "vite",
     "build": "vite build"
   },
-  "keywords": [],
-  "author": "Elone Hoo <hi@elonehoo.me>",
-  "license": "MIT",
   "dependencies": {
     "@apollo/client": "^3.7.4",
     "@vue/apollo-composable": "4.0.0-beta.1",

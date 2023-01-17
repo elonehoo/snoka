@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import SuitesView from './SuitesView.vue'
-import { testItemFragment } from './TestItem.vue'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { useRoute } from 'vue-router'
+import { testItemFragment } from './TestItem.vue'
+import SuitesView from './SuitesView.vue'
 const route = useRoute()
 const runTestFileAllSuiteFragment = gql`
 fragment runTestFileAllSuite on TestSuite {
@@ -24,7 +24,8 @@ fragment runTestFileAllSuite on TestSuite {
 }
 ${testItemFragment}
 `
-const { result, subscribeToMore, onResult } = useQuery(() => route.params.runId !== 'last-run' ? gql`
+const { result, subscribeToMore, onResult } = useQuery(() => route.params.runId !== 'last-run'
+  ? gql`
   query testFileAllView ($runId: ID!) {
     run (id: $runId) {
       id
@@ -34,7 +35,8 @@ const { result, subscribeToMore, onResult } = useQuery(() => route.params.runId 
     }
   }
   ${runTestFileAllSuiteFragment}
-` : gql`
+`
+  : gql`
   query testFileAllViewLastRun {
     run: lastRun {
       id
@@ -45,9 +47,11 @@ const { result, subscribeToMore, onResult } = useQuery(() => route.params.runId 
   }
   ${runTestFileAllSuiteFragment}
 `, () => ({
-  ...route.params.runId !== 'last-run' ? {
-    runId: route.params.runId,
-  } : {},
+  ...route.params.runId !== 'last-run'
+    ? {
+        runId: route.params.runId,
+      }
+    : {},
 }), {
   fetchPolicy: 'cache-and-network',
 })

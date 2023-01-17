@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import RunItem from './RunItem.vue'
 import { RotateCcwIcon } from '@zhuowenli/vue-feather-icons'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
+import RunItem from './RunItem.vue'
 const emit = defineEmits()
 const runListFragment = gql`
 fragment runList on Run {
@@ -50,7 +50,8 @@ subscribeToMore({
   ${runListFragment}
   `,
   updateQuery: (previousResult, { subscriptionData: { data } }) => {
-    if (previousResult.run.find(f => f.id === data.runAdded.id)) return previousResult
+    if (previousResult.run.find(f => f.id === data.runAdded.id))
+      return previousResult
     return {
       runs: [
         ...previousResult.runs,
@@ -76,7 +77,7 @@ subscribeToMore({
     }
   },
 })
-function close () {
+function close() {
   emit('close')
 }
 const route = useRoute()

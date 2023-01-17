@@ -1,10 +1,10 @@
 import sinon from 'sinon'
 import must from 'must'
 import shortid from 'shortid'
-import { Context, TestSuite } from './types'
+import type { Context, TestSuite } from './types'
 import { createSnokaGlobal } from './global'
 
-export function registerGlobals (ctx: Context, target: any) {
+export function registerGlobals(ctx: Context, target: any) {
   target.snoka = createSnokaGlobal(ctx)
   target.expect = must
   target.sinon = sinon
@@ -12,9 +12,9 @@ export function registerGlobals (ctx: Context, target: any) {
   let currentSuite: TestSuite
 
   target.describe = (title: string, handler: () => unknown) => {
-    if (currentSuite) {
+    if (currentSuite)
       throw new Error('Nested describe() calls are not supported yet')
-    }
+
     currentSuite = {
       id: shortid(),
       title,
@@ -32,9 +32,9 @@ export function registerGlobals (ctx: Context, target: any) {
   }
 
   target.it = target.test = (title: string, handler: () => unknown) => {
-    if (!currentSuite) {
+    if (!currentSuite)
       throw new Error('test() must be used inside the describe() handler')
-    }
+
     currentSuite.tests.push({
       id: shortid(),
       title,
@@ -44,30 +44,30 @@ export function registerGlobals (ctx: Context, target: any) {
   }
 
   target.beforeAll = (handler: () => unknown) => {
-    if (!currentSuite) {
+    if (!currentSuite)
       throw new Error('beforeAll() must be used inside the describe() handler')
-    }
+
     currentSuite.beforeAllHandlers.push(handler)
   }
 
   target.afterAll = (handler: () => unknown) => {
-    if (!currentSuite) {
+    if (!currentSuite)
       throw new Error('afterAll() must be used inside the describe() handler')
-    }
+
     currentSuite.afterAllHandlers.push(handler)
   }
 
   target.beforeEach = (handler: () => unknown) => {
-    if (!currentSuite) {
+    if (!currentSuite)
       throw new Error('beforeEach() must be used inside the describe() handler')
-    }
+
     currentSuite.beforeEachHandlers.push(handler)
   }
 
   target.afterEach = (handler: () => unknown) => {
-    if (!currentSuite) {
+    if (!currentSuite)
       throw new Error('afterEach() must be used inside the describe() handler')
-    }
+
     currentSuite.afterEachHandlers.push(handler)
   }
 }

@@ -35,8 +35,8 @@ describe('typescript test suite', () => {
   })
 })
 
-function wait (delay: number) {
-  return new Promise(resolve => {
+function wait(delay: number) {
+  return new Promise((resolve) => {
     setTimeout(resolve, delay)
   })
 }

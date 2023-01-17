@@ -2,15 +2,15 @@
   "name": "@snoka/runner",
   "version": "0.0.0",
   "description": "",
+  "author": "",
+  "license": "MIT",
+  "keywords": [],
   "main": "./dist/index.js",
   "types": "./types.d.ts",
   "scripts": {
     "build": "tsup",
     "build:fix": "esno scripts/postbuild.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "@akryum/workerpool": "6.0.5-alpha.2",
     "@babel/core": "^7.20.12",

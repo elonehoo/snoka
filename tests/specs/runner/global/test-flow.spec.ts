@@ -12,9 +12,8 @@ describe('peeky.retry()', () => {
     let times = 0
     const spy = sinon.fake(() => {
       times++
-      if (times < 4) {
+      if (times < 4)
         throw new Error('Not enough times')
-      }
     })
     expect(spy.callCount).to.eql(0)
     await retry(() => spy(), 5)
@@ -29,7 +28,8 @@ describe('peeky.retry()', () => {
     let error: Error
     try {
       await retry(() => spy(), 5)
-    } catch (e) {
+    }
+    catch (e) {
       error = e
     }
     expect(spy.callCount).to.eql(5)

@@ -2,14 +2,14 @@ import './vars.css'
 import './index.css'
 import './transitions.css'
 import { createApp, provide } from 'vue'
+import { DefaultApolloClient } from '@vue/apollo-composable'
 import App from './App.vue'
 import { router } from './router'
-import { DefaultApolloClient } from '@vue/apollo-composable'
 import { apolloClient } from './apollo'
 
 const app = createApp({
   extends: App,
-  setup () {
+  setup() {
     provide(DefaultApolloClient, apolloClient)
   },
 })

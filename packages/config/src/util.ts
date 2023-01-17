@@ -1,16 +1,16 @@
 import { isObject } from '@snoka/utils'
 
-export function mergeConfig<T extends (Record<string, any>) = Record<string, any>> (a: T, b: T): T {
+export function mergeConfig<T extends (Record<string, any> = Record<string, any>>(a: T, b: T): T {
   const merged: T = { ...a }
   for (const key in b) {
     const value = b[key]
-    if (value == null) {
+    if (value == null) 
       continue
-    }
+    
 
     const existing = merged[key]
     if (Array.isArray(existing) && Array.isArray(value)) {
-      // @ts-ignore
+      // @ts-expect-error
       merged[key] = [...existing, ...value]
       continue
     }

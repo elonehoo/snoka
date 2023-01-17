@@ -1,16 +1,16 @@
+import { join } from 'path'
+import HTTP from 'http'
 import { createReactiveFileSystem } from '@snoka/reactive'
 import { ApolloServer, PubSub } from 'apollo-server-express'
 import express from 'express'
 import { makeSchema } from 'nexus'
-import { join } from 'path'
-import { Context } from './context'
-import * as types from './schema'
-import { loadTestFiles } from './schema'
-import HTTP from 'http'
 import consola from 'consola'
 import { setupConfigLoader } from '@snoka/config'
+import type { Context } from './context'
+import * as types from './schema'
+import { loadTestFiles } from './schema'
 
-export async function createServer () {
+export async function createServer() {
   const schema = makeSchema({
     types,
     outputs: {
@@ -33,7 +33,7 @@ export async function createServer () {
   })
   const pubsub = new PubSub()
 
-  function createContext (): Context {
+  function createContext(): Context {
     return {
       config,
       reactiveFs,
@@ -50,7 +50,7 @@ export async function createServer () {
     subscriptions: {
       path: '/api',
     },
-    formatError (error) {
+    formatError(error) {
       consola.error(error)
       consola.log(JSON.stringify(error, null, 2))
       return error

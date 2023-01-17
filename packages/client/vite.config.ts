@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   optimizeDeps: {
-    exclude: ["/@apollo/,/@vue\/apollo/,/graphql/,"],
+    exclude: ['/@apollo/,/@vue\/apollo/,/graphql/,'],
     include: [
       'fast-json-stable-stringify',
       'zen-observable',

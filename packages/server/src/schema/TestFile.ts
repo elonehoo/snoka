@@ -1,12 +1,13 @@
+import { join } from 'path'
 import { extendType, idArg, intArg, nonNull, objectType } from 'nexus'
 import launchEditor from 'launch-editor'
-import { Context } from '../context'
-import { Status, StatusEnum } from './Status'
-import { join } from 'path'
+import type { Context } from '../context'
+import type { StatusEnum } from './Status'
+import { Status } from './Status'
 
 export const TestFile = objectType({
   name: 'TestFile',
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
     t.nonNull.string('relativePath')
     t.nonNull.field('status', {
@@ -19,7 +20,7 @@ export const TestFile = objectType({
 
 export const TestFileQuery = extendType({
   type: 'Query',
-  definition (t) {
+  definition(t) {
     t.nonNull.list.field('testFiles', {
       type: nonNull(TestFile),
       resolve: () => testFiles.filter(f => !f.deleted),
@@ -37,7 +38,7 @@ export const TestFileQuery = extendType({
 
 export const TestFileMutation = extendType({
   type: 'Mutation',
-  definition (t) {
+  definition(t) {
     t.boolean('openTestFileInEditor', {
       args: {
         id: nonNull(idArg()),
@@ -74,7 +75,7 @@ interface TestFileRemovedPayload {
 export const TestFileSubscription = extendType({
   type: 'Subscription',
 
-  definition (t) {
+  definition(t) {
     t.field('testFileAdded', {
       type: nonNull(TestFile),
       subscribe: (_, args, ctx) => ctx.pubsub.asyncIterator(TestFileAdded),
@@ -106,7 +107,7 @@ export interface TestFileData {
 
 export let testFiles: TestFileData[] = []
 
-export async function loadTestFiles (ctx: Context) {
+export async function loadTestFiles(ctx: Context) {
   testFiles = ctx.reactiveFs.list().map(path => createTestFile(ctx, path))
 
   ctx.reactiveFs.onFileAdd(async (relativePath) => {
@@ -115,12 +116,13 @@ export async function loadTestFiles (ctx: Context) {
       await updateTestFile(ctx, testFile.id, {
         deleted: false,
       })
-    } else {
+    }
+    else {
       testFile = createTestFile(ctx, relativePath)
       testFiles.push(testFile)
     }
     ctx.pubsub.publish(TestFileAdded, {
-      testFile: testFile,
+      testFile,
     } as TestFileAddedPayload)
   })
 
@@ -135,7 +137,7 @@ export async function loadTestFiles (ctx: Context) {
   })
 }
 
-export async function updateTestFile (ctx: Context, id: string, data: Partial<Omit<TestFileData, 'id'>>) {
+export async function updateTestFile(ctx: Context, id: string, data: Partial<Omit<TestFileData, 'id'>>) {
   const testFile = testFiles.find(f => f.id === id)
   Object.assign(testFile, data)
   ctx.pubsub.publish(TestFileUpdated, {
@@ -144,7 +146,7 @@ export async function updateTestFile (ctx: Context, id: string, data: Partial<Om
   return testFile
 }
 
-function createTestFile (ctx: Context, relativePath: string): TestFileData {
+function createTestFile(ctx: Context, relativePath: string): TestFileData {
   return {
     id: relativePath,
     relativePath,

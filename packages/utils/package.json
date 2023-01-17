@@ -2,9 +2,9 @@
   "name": "@snoka/utils",
   "version": "0.0.0",
   "description": "",
-  "main": "./dist/index.js",
-  "module": "./dist/index.cjs",
-  "types": "./dist/index.d.ts",
+  "author": "Elone Hoo <hi@elonehoo.me>",
+  "license": "MIT",
+  "keywords": [],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -12,6 +12,9 @@
       "import": "./dist/index.js"
     }
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -19,9 +22,6 @@
     "build": "tsup",
     "build:fix": "esno scripts/postbuild.ts"
   },
-  "keywords": [],
-  "author": "Elone Hoo <hi@elonehoo.me>",
-  "license": "MIT",
   "dependencies": {
     "chalk": "4.1.2",
     "consola": "^2.15.3",

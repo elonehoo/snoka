@@ -1,6 +1,6 @@
-import { RunTestFileResult } from './runner'
+import type { RunTestFileResult } from './runner'
 
-export function getStats (results: RunTestFileResult[]) {
+export function getStats(results: RunTestFileResult[]) {
   let suiteCount = 0
   let errorSuiteCount = 0
   let testCount = 0

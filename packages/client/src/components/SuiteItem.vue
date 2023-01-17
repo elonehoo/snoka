@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { computed, defineProps } from 'vue'
 import TestItem from './TestItem.vue'
 import StatusIcon from './StatusIcon.vue'
-import { computed, defineProps } from 'vue'
 const props = defineProps({
   suite: {
     type: Object,
@@ -17,9 +17,9 @@ const props = defineProps({
   },
 })
 const filteredTests = computed(() => {
-  if (props.searchReg) {
+  if (props.searchReg)
     return props.suite.tests.filter(t => t.title.search(props.searchReg) !== -1)
-  }
+
   return props.suite.tests
 })
 </script>

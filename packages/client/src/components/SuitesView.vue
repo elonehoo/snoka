@@ -1,9 +1,9 @@
 <script lang="ts" setup>
+import { SearchIcon } from '@zhuowenli/vue-feather-icons'
+import { computed, defineProps, ref } from 'vue'
 import BaseSplitPane from './BaseSplitPane.vue'
 import BaseInput from './BaseInput.vue'
 import SuiteItem from './SuiteItem.vue'
-import { SearchIcon } from '@zhuowenli/vue-feather-icons'
-import { computed, defineProps, ref } from 'vue'
 const props = defineProps({
   suites: {
     type: Array,

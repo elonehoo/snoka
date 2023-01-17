@@ -1,5 +1,6 @@
-import { createReactiveFileSystem, ReactiveFileSystem } from '@snoka/reactive'
 import { join } from 'path'
+import type { ReactiveFileSystem } from '@snoka/reactive'
+import { createReactiveFileSystem } from '@snoka/reactive'
 
 let fs: ReactiveFileSystem
 

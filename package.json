@@ -6,12 +6,12 @@
   "author": "Elone Hoo <hi@elonehoo.me>",
   "license": "MIT",
   "scripts": {
-    "dev":"pnpm -C packages/client run dev",
+    "dev": "pnpm -C packages/client run dev",
     "dev:server": "pnpm -C demo run dev:server",
     "dev:run": "pnpm -C demo run dev:run",
     "build": "pnpm -r --filter='./packages/**' run build",
-    "test:server":"pnpm -C tests run dev:server",
-    "test":"pnpm -C tests run test",
+    "test:server": "pnpm -C tests run dev:server",
+    "test": "pnpm -C tests run test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

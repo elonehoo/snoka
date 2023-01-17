@@ -2,13 +2,13 @@
   "name": "@snoka/tests",
   "version": "0.0.0",
   "description": "",
+  "author": "",
+  "license": "MIT",
+  "keywords": [],
   "scripts": {
     "dev:server": "nodemon ../packages/server/dist/standalone.cjs --watch .. -e js --ignore tests/ --ignore demo/",
     "test": "snoka run"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "@snoka/cli": "workspace:*",
     "@snoka/config": "workspace:*",

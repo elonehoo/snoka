@@ -2,9 +2,9 @@ const splitRE = /\r?\n/
 
 const range = 2
 
-export function generateCodeFrame (
+export function generateCodeFrame(
   source: string,
-  start: number | { line: number, column: number } = 0,
+  start: number | { line: number; column: number } = 0,
   end?: number,
 ): string {
   start = posToNumber(source, start)
@@ -16,7 +16,8 @@ export function generateCodeFrame (
     count += lines[i].length + 1
     if (count >= start) {
       for (let j = i - range; j <= i + range || end > count; j++) {
-        if (j < 0 || j >= lines.length) continue
+        if (j < 0 || j >= lines.length)
+          continue
         const line = j + 1
         res.push(
           `${line}${' '.repeat(Math.max(3 - String(line).length, 0))}|  ${
@@ -31,11 +32,12 @@ export function generateCodeFrame (
             1,
             end > count ? lineLength - pad : end - start,
           )
-          res.push('   |  ' + ' '.repeat(pad) + '^'.repeat(length))
-        } else if (j > i) {
+          res.push(`   |  ${' '.repeat(pad)}${'^'.repeat(length)}`)
+        }
+        else if (j > i) {
           if (end > count) {
             const length = Math.max(Math.min(end - count, lineLength), 1)
-            res.push('   |  ' + '^'.repeat(length))
+            res.push(`   |  ${'^'.repeat(length)}`)
           }
           count += lineLength + 1
         }
@@ -46,16 +48,17 @@ export function generateCodeFrame (
   return res.join('\n')
 }
 
-export function posToNumber (
+export function posToNumber(
   source: string,
-  pos: number | { line: number, column: number },
+  pos: number | { line: number; column: number },
 ): number {
-  if (typeof pos === 'number') return pos
+  if (typeof pos === 'number')
+    return pos
   const lines = source.split(splitRE)
   const { line, column } = pos
   let start = 0
-  for (let i = 0; i < line - 1; i++) {
+  for (let i = 0; i < line - 1; i++)
     start += lines[i].length + 1
-  }
+
   return start + column
 }

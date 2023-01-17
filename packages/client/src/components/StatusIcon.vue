@@ -1,14 +1,21 @@
 <script lang="ts" setup>
 import {
+  CheckCircleIcon,
+  CheckIcon,
+  ChevronsRightIcon,
   CircleIcon,
   ClockIcon,
-  CheckCircleIcon,
   XCircleIcon,
-  CheckIcon,
   XIcon,
-  ChevronsRightIcon,
 } from '@zhuowenli/vue-feather-icons'
 import { defineProps } from 'vue'
+const props = defineProps({
+  status: {
+    type: String,
+    required: true,
+  },
+  icon: {},
+})
 const icons = {
   idle: CircleIcon,
   // eslint-disable-next-line @typescript-eslint/camelcase
@@ -39,13 +46,6 @@ const smallClasses = {
   error: 'bg-red-500 text-white',
   skipped: 'bg-gray-300 dark:bg-gray-700 text-white',
 }
-const props = defineProps({
-  status: {
-    type: String,
-    required: true,
-  },
-  icon: {},
-})
 </script>
 
 <template>

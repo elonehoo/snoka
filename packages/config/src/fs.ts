@@ -1,27 +1,27 @@
 import { createReactiveFileSystem } from '@snoka/reactive'
 import { snokaConfigFileMatch } from './defaults'
 
-export async function setupConfigContentLoader (baseDir: string = process.cwd(), glob: string | string[] = snokaConfigFileMatch) {
+export async function setupConfigContentLoader(baseDir: string = process.cwd(), glob: string | string[] = snokaConfigFileMatch) {
   const fs = await createReactiveFileSystem({
     baseDir,
     glob,
     ignored: ['node_modules'],
   })
 
-  function getConfigPath () {
+  function getConfigPath() {
     const [filePath] = fs.list('.', { excludeSubDirectories: true })
     return filePath
   }
 
-  function loadConfigFileContent () {
+  function loadConfigFileContent() {
     return fs.files[getConfigPath()]?.waitForContent
   }
 
-  function readConfigFileContent () {
+  function readConfigFileContent() {
     return fs.files[getConfigPath()]?.content
   }
 
-  function watchConfigFileContent (handler: (content: string, fileName: string) => unknown) {
+  function watchConfigFileContent(handler: (content: string, fileName: string) => unknown) {
     let oldContent: string
     fs.effect(() => {
       const content = readConfigFileContent()
