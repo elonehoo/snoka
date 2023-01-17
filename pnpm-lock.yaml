@@ -92,6 +92,17 @@ importers:
       tailwindcss: 3.2.4_postcss@8.4.21
       vite: 4.0.4
 
+  packages/config:
+    specifiers:
+      '@snoka/reactive': workspace:^0.0.0
+      '@snoka/utils': workspace:^0.0.0
+      '@types/node': ^18.11.18
+    dependencies:
+      '@snoka/reactive': link:../reactive
+      '@snoka/utils': link:../utils
+    devDependencies:
+      '@types/node': 18.11.18
+
   packages/reactive:
     specifiers:
       '@types/fs-extra': ^11.0.1
