@@ -94,12 +94,14 @@ importers:
 
   packages/config:
     specifiers:
-      '@snoka/reactive': workspace:^0.0.0
-      '@snoka/utils': workspace:^0.0.0
+      '@snoka/reactive': workspace:*
+      '@snoka/utils': workspace:*
       '@types/node': ^18.11.18
+      consola: ^2.15.3
     dependencies:
       '@snoka/reactive': link:../reactive
       '@snoka/utils': link:../utils
+      consola: 2.15.3
     devDependencies:
       '@types/node': 18.11.18
 
@@ -121,7 +123,7 @@ importers:
       '@akryum/workerpool': 6.0.5-alpha.2
       '@babel/core': ^7.20.12
       '@snoka/reactive': workspace:*
-      '@snoka/utils': workspace:^0.0.0
+      '@snoka/utils': workspace:*
       '@types/chalk': ^2.2.0
       '@types/shortid': ^0.0.29
       '@types/sinon': ^10.0.13
@@ -163,6 +165,7 @@ importers:
 
   packages/server:
     specifiers:
+      '@snoka/config': workspace:*
       '@snoka/reactive': workspace:*
       '@snoka/runner': workspace:*
       '@types/shortid': ^0.0.29
@@ -176,6 +179,7 @@ importers:
       random-emoji: ^1.0.2
       shortid: ^2.2.16
     dependencies:
+      '@snoka/config': link:../config
       '@snoka/reactive': link:../reactive
       '@snoka/runner': link:../runner
       apollo-server-express: 2.19.2_graphql@15.8.0
@@ -212,13 +216,15 @@ importers:
   tests:
     specifiers:
       '@snoka/cli': workspace:*
-      '@snoka/reactive': workspace:^0.0.0
+      '@snoka/config': workspace:*
+      '@snoka/reactive': workspace:*
       '@snoka/runner': workspace:*
-      '@snoka/server': workspace:^0.0.0
-      '@snoka/utils': workspace:^0.0.0
+      '@snoka/server': workspace:*
+      '@snoka/utils': workspace:*
       nodemon: ^2.0.20
     dependencies:
       '@snoka/cli': link:../packages/cli
+      '@snoka/config': link:../packages/config
       '@snoka/reactive': link:../packages/reactive
       '@snoka/runner': link:../packages/runner
       '@snoka/server': link:../packages/server

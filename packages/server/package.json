@@ -16,6 +16,7 @@
     "build:fix": "esno scripts/postbuild.ts && cp src/context.d.ts dist/context.d.d.ts"
   },
   "dependencies": {
+    "@snoka/config": "workspace:*",
     "@snoka/reactive": "workspace:*",
     "@snoka/runner": "workspace:*",
     "apollo-server-express": "2.19.2",

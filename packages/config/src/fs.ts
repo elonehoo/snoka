@@ -1,7 +1,7 @@
 import { createReactiveFileSystem } from '@snoka/reactive'
 import { snokaConfigFileMatch } from './defaults'
 
-export async function setupConfigContentLoader (baseDir: string, glob: string | string[] = snokaConfigFileMatch) {
+export async function setupConfigContentLoader (baseDir: string = process.cwd(), glob: string | string[] = snokaConfigFileMatch) {
   const fs = await createReactiveFileSystem({
     baseDir,
     glob,

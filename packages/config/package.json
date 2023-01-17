@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@snoka/reactive": "workspace:*",
-    "@snoka/utils": "workspace:*"
+    "@snoka/utils": "workspace:*",
+    "consola": "^2.15.3"
   }
 }
