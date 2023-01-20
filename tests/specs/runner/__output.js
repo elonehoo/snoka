@@ -1,24 +1,134 @@
-'use strict'
+'use strict';
 
-require('rollup-plugin-esbuild')
-require('rollup')
-const fs = require('fs')
-require('memfs')
-require('unionfs')
-require('fs-monkey')
-const path = require('path')
-require('@akryum/workerpool');
+var stats = require('@snoka/runner/src/stats');
 
-({ ...fs })
-function getCachePath(filePath) {
-  const cacheKey = path.relative(process.cwd(), filePath).replace(/(\/|\.)/g, '_')
-  return path.join(process.cwd(), 'node_modules', '.temp', 'peeky-build-cache', `${cacheKey}.json`)
-}
-
-describe('build cache', () => {
-  it('generates a cache path', () => {
-    sinon.stub(process, 'cwd').callsFake(() => '/home/acme/project')
-    expect(getCachePath('/home/acme/project/src/test.spec.js')).to.equal('/home/acme/project/node_modules/.temp/peeky-build-cache/src_test_spec_js.json')
-  })
-})
-// # sourceMappingURL=__output.js.map
+describe("getStats()", () => {
+  test("no errors", () => {
+    const stats$1 = stats.getStats([
+      {
+        duration: 0,
+        filePath: "",
+        suites: [
+          {
+            id: "",
+            filePath: "",
+            title: "",
+            errors: 0,
+            tests: [
+              {
+                id: "",
+                title: "",
+                error: null
+              }
+            ]
+          },
+          {
+            id: "",
+            filePath: "",
+            title: "",
+            errors: 0,
+            tests: [
+              {
+                id: "",
+                title: "",
+                error: null
+              },
+              {
+                id: "",
+                title: "",
+                error: null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        duration: 0,
+        filePath: "",
+        suites: [
+          {
+            id: "",
+            filePath: "",
+            title: "",
+            errors: 0,
+            tests: [
+              {
+                id: "",
+                title: "",
+                error: null
+              }
+            ]
+          },
+          {
+            id: "",
+            filePath: "",
+            title: "",
+            errors: 0,
+            tests: [
+              {
+                id: "",
+                title: "",
+                error: null
+              },
+              {
+                id: "",
+                title: "",
+                error: null
+              }
+            ]
+          }
+        ]
+      }
+    ]);
+    expect(stats$1.suiteCount).to.eql(4);
+    expect(stats$1.errorSuiteCount).to.eql(0);
+    expect(stats$1.testCount).to.eql(6);
+    expect(stats$1.errorTestCount).to.eql(0);
+  });
+  test("counts errors", () => {
+    const stats$1 = stats.getStats([
+      {
+        duration: 0,
+        filePath: "",
+        suites: [
+          {
+            id: "",
+            filePath: "",
+            title: "",
+            errors: 0,
+            tests: [
+              {
+                id: "",
+                title: "",
+                error: null
+              }
+            ]
+          },
+          {
+            id: "",
+            filePath: "",
+            title: "",
+            errors: 1,
+            tests: [
+              {
+                id: "",
+                title: "",
+                error: new Error()
+              },
+              {
+                id: "",
+                title: "",
+                error: null
+              }
+            ]
+          }
+        ]
+      }
+    ]);
+    expect(stats$1.suiteCount).to.eql(2);
+    expect(stats$1.errorSuiteCount).to.eql(1);
+    expect(stats$1.testCount).to.eql(3);
+    expect(stats$1.errorTestCount).to.eql(1);
+  });
+});
+//# sourceMappingURL=__output.js.map
