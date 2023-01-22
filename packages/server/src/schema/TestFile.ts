@@ -103,6 +103,7 @@ export interface TestFileData {
   status: StatusEnum
   deleted: boolean
   duration: number
+  modules: string[]
 }
 
 export let testFiles: TestFileData[] = []
@@ -154,5 +155,6 @@ function createTestFile(ctx: Context, relativePath: string): TestFileData {
     status: 'idle',
     deleted: false,
     duration: null,
+    modules: [],
   }
 }

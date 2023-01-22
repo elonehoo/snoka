@@ -8,9 +8,11 @@ import consola from 'consola'
 import { setupConfigLoader } from '@snoka/config'
 import type { Context } from './context'
 import * as types from './schema'
+import { setupRunWatch } from './watch'
+import { run } from './run'
 import { loadTestFiles } from './schema'
 
-export async function createServer() {
+export async function createServer () {
   const schema = makeSchema({
     types,
     outputs: {
@@ -33,7 +35,7 @@ export async function createServer() {
   })
   const pubsub = new PubSub()
 
-  function createContext(): Context {
+  function createContext (): Context {
     return {
       config,
       reactiveFs,
@@ -42,6 +44,7 @@ export async function createServer() {
   }
 
   await loadTestFiles(createContext())
+  await setupRunWatch(createContext())
 
   const apollo = new ApolloServer({
     schema,
@@ -50,7 +53,7 @@ export async function createServer() {
     subscriptions: {
       path: '/api',
     },
-    formatError(error) {
+    formatError (error) {
       consola.error(error)
       consola.log(JSON.stringify(error, null, 2))
       return error
@@ -65,6 +68,11 @@ export async function createServer() {
     path: '/api',
   })
   apollo.installSubscriptionHandlers(http)
+
+  // (Don't await)
+  run(createContext(), {
+    testFileIds: null,
+  })
 
   return {
     apollo,

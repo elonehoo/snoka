@@ -26,6 +26,7 @@ module.exports = {
       cursor: {
         'ew-resize': 'ew-resize',
         'ns-resize': 'ns-resize',
+        'cursor-not-allowed': 'cursor-not-allowed',
       },
     },
   },

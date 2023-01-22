@@ -1,13 +1,20 @@
 <script lang="ts" setup>
-import { ActivityIcon, LayersIcon } from '@zhuowenli/vue-feather-icons'
+import BaseButton from './BaseButton.vue'
+import BaseSwitch from './BaseSwitch.vue'
+import RunSelector from './RunSelector.vue'
+import RunNewButton from './RunNewButton.vue'
+import RunItem from './RunItem.vue'
+import {
+  LayersIcon,
+  ActivityIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from '@zhuowenli/vue-feather-icons'
 import { useQuery, useResult } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { useRoute } from 'vue-router'
-import { ref } from 'vue'
-import RunItem from './RunItem.vue'
-import RunNewButton from './RunNewButton.vue'
-import BaseButton from './BaseButton.vue'
-import RunSelector from './RunSelector.vue'
+import { ref, computed } from 'vue'
+import { useSettings } from './settings'
 // Current run
 const runDetailsFragment = gql`
 fragment runDetails on Run {
@@ -20,29 +27,26 @@ fragment runDetails on Run {
 }
 `
 const route = useRoute()
-const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-run'
-  ? gql`
+const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-run' ? gql`
   query run ($id: ID!) {
     run (id: $id) {
       ...runDetails
     }
   }
   ${runDetailsFragment}
-`
-  : gql`
+` : gql`
   query lastRun {
     lastRun {
       ...runDetails
     }
   }
   ${runDetailsFragment}
-`, () => route.params.runId !== 'last-run'
-  ? {
-      id: route.params.runId,
-    }
-  : {})
+`, () => route.params.runId !== 'last-run' ? {
+  id: route.params.runId,
+} : {})
 const currentRun = useResult(result)
 const isSelectorOpen = ref(false)
+const isSubMenuOpen = ref(false)
 // Subs
 // Updated
 subscribeToMore({
@@ -70,12 +74,23 @@ subscribeToMore({
   updateQuery: (previousResult, { subscriptionData: { data } }) => {
     if (route.params.runId) {
       return previousResult
-    }
-    else {
+    } else {
       return {
         lastRun: data.runAdded,
       }
     }
+  },
+})
+// Settings
+const { settings, updateSettings } = useSettings()
+const watchEnabled = computed<boolean>({
+  get () {
+    return !!settings.value?.watch
+  },
+  set (value) {
+    updateSettings({
+      watch: value,
+    })
   },
 })
 </script>
@@ -110,6 +125,37 @@ subscribeToMore({
         </template>
       </div>
 
+      <RunNewButton class="flex-none" />
+
+      <BaseButton
+        color="gray"
+        flat
+        class="flex-none p-2"
+        @click="isSubMenuOpen = !isSubMenuOpen"
+      >
+        <component
+          :is="isSubMenuOpen ? ChevronUpIcon : ChevronDownIcon"
+          class="w-4 h-4"
+        />
+      </BaseButton>
+    </div>
+  </div>
+
+  <transition name="toolbar">
+    <div
+      v-if="isSubMenuOpen"
+      v-bind="$attrs"
+      class="h-10 flex items-center space-x-1 px-1"
+    >
+      <BaseSwitch
+        v-model="watchEnabled"
+        class="ml-2"
+      >
+        Watch
+      </BaseSwitch>
+
+      <div class="w-0 flex-1" />
+
       <BaseButton
         flat
         class="flex-none p-2"
@@ -117,10 +163,8 @@ subscribeToMore({
       >
         <LayersIcon class="w-4 h-4" />
       </BaseButton>
-
-      <RunNewButton class="flex-none" />
     </div>
-  </div>
+  </transition>
 
   <transition name="slide-from-left">
     <RunSelector

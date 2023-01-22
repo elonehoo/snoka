@@ -8,14 +8,14 @@ import { buildTestFile } from './build'
 import { registerGlobals } from './globals'
 import { runTests } from './run-tests'
 
-export async function runTestFile(options: RunTestFileOptions) {
+export async function runTestFile (options: RunTestFileOptions) {
   try {
     const ctx: Context = {
       options,
       suites: [],
     }
     const time = Date.now()
-    await buildTestFile(ctx)
+    const { modules } = await buildTestFile(ctx)
     registerGlobals(ctx, global)
     installSourceMap()
     require(join(dirname(ctx.options.entry), '/__output.js'))
@@ -41,9 +41,9 @@ export async function runTestFile(options: RunTestFileOptions) {
       filePath: options.entry,
       suites,
       duration,
+      modules,
     }
-  }
-  catch (e) {
+  } catch (e) {
     consola.error(`Running tests failed: ${e.stack}`)
     throw e
   }

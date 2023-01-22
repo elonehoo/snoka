@@ -56,10 +56,11 @@ importers:
   packages/client:
     specifiers:
       '@apollo/client': ^3.7.4
+      '@snoka/server': workspace:*
       '@types/vue-feather-icons': ^5.0.4
       '@vitejs/plugin-vue': ^4.0.0
       '@vue/apollo-composable': 4.0.0-beta.1
-      '@vue/compiler-sfc': ^3.2.45
+      '@vue/compiler-sfc': ^3.0.5
       '@vuedx/typecheck': ^0.7.6
       '@vuedx/typescript-plugin-vue': ^0.7.6
       '@zhuowenli/vue-feather-icons': ^5.0.2
@@ -70,10 +71,11 @@ importers:
       postcss-nested: ^6.0.0
       tailwindcss: ^3.2.4
       vite: ^4.0.4
-      vue: ^3.2.45
+      vue: ^3.0.5
       vue-router: ^4.1.6
     dependencies:
       '@apollo/client': 3.7.4_graphql@15.8.0
+      '@snoka/server': link:../server
       '@vue/apollo-composable': 4.0.0-beta.1_mlat7jc4qpgiouohhqth7o7eha
       '@zhuowenli/vue-feather-icons': 5.0.2
       graphql: 15.8.0
@@ -170,6 +172,7 @@ importers:
       '@snoka/runner': workspace:*
       '@types/shortid': ^0.0.29
       apollo-server-express: 2.19.2
+      chokidar: ^3.5.3
       consola: ^2.15.3
       express: ^4.18.2
       graphql: ^15.4.0
@@ -183,6 +186,7 @@ importers:
       '@snoka/reactive': link:../reactive
       '@snoka/runner': link:../runner
       apollo-server-express: 2.19.2_graphql@15.8.0
+      chokidar: 3.5.3
       consola: 2.15.3
       express: 4.18.2
       graphql: 15.8.0
