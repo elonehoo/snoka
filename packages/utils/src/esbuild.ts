@@ -1,14 +1,14 @@
-import path from 'path'
+import { extname } from 'path'
 import chalk from 'chalk'
-import type {
-  Loader,
-  Message,
+import {
   Service,
+  Message,
+  Loader,
   TransformOptions,
   TransformResult,
 } from 'esbuild'
 import mergeSourceMap from 'merge-source-map'
-import type { SourceMap } from 'rollup'
+import { SourceMap } from 'rollup'
 import consola from 'consola'
 import { cleanUrl } from './net'
 import { generateCodeFrame } from './code'
@@ -22,14 +22,14 @@ export interface ESBuildOptions extends TransformOptions {
   jsxInject?: string
 }
 
-export async function ensureESBuildService() {
-  if (!_servicePromise)
+export async function ensureESBuildService () {
+  if (!_servicePromise) {
     _servicePromise = require('esbuild').startService()
-
+  }
   return _servicePromise!
 }
 
-export async function stopESBuildService() {
+export async function stopESBuildService () {
   if (_servicePromise) {
     const service = await _servicePromise
     service.stop()
@@ -41,7 +41,7 @@ export type EsbuildTransformResult = Omit<TransformResult, 'map'> & {
   map: SourceMap
 }
 
-export async function transformWithEsbuild(
+export async function transformWithEsbuild (
   code: string,
   filename: string,
   options?: TransformOptions,
@@ -50,7 +50,7 @@ export async function transformWithEsbuild(
   const service = await ensureESBuildService()
   // if the id ends with a valid ext, use it (e.g. vue blocks)
   // otherwise, cleanup the query before checking the ext
-  const ext = path.extname(
+  const ext = extname(
     /\.\w+$/.test(filename) ? filename : cleanUrl(filename),
   )
   const resolvedOptions = {
@@ -76,21 +76,19 @@ export async function transformWithEsbuild(
         ...result,
         map: mergeSourceMap(inMap, nextMap) as SourceMap,
       }
-    }
-    else {
+    } else {
       return {
         ...result,
         map: JSON.parse(result.map),
       }
     }
-  }
-  catch (e) {
+  } catch (e) {
     consola.error('esbuild error with options used: ', resolvedOptions)
     // patch error information
     if (e.errors) {
       e.frame = ''
       e.errors.forEach((m: Message) => {
-        e.frame += `\n${prettifyMessage(m, code)}`
+        e.frame += '\n' + prettifyMessage(m, code)
       })
       e.loc = e.errors[0].location
     }
@@ -98,18 +96,18 @@ export async function transformWithEsbuild(
   }
 }
 
-function prettifyMessage(m: Message, code: string): string {
+function prettifyMessage (m: Message, code: string): string {
   let res = chalk.yellow(m.text)
   if (m.location) {
     const lines = code.split(/\r?\n/g)
     const line = Number(m.location.line)
     const column = Number(m.location.column)
-    const offset
-      = lines
+    const offset =
+      lines
         .slice(0, line - 1)
-        .map(l => l.length)
+        .map((l) => l.length)
         .reduce((total, l) => total + l + 1, 0) + column
-    res += `\n${generateCodeFrame(code, offset, offset + 1)}`
+    res += '\n' + generateCodeFrame(code, offset, offset + 1)
   }
-  return `${res}\n`
+  return res + '\n'
 }

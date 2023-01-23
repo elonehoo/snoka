@@ -38,6 +38,7 @@ importers:
 
   packages/cli:
     specifiers:
+      '@snoka/config': workspace:^0.0.0
       '@snoka/runner': workspace:*
       '@snoka/server': workspace:*
       '@types/lodash': ^4.14.191
@@ -45,6 +46,7 @@ importers:
       consola: ^2.15.3
       lodash: ^4.17.21
     dependencies:
+      '@snoka/config': link:../config
       '@snoka/runner': link:../runner
       '@snoka/server': link:../server
       commander: 9.5.0
