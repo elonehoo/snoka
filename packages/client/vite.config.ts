@@ -12,7 +12,9 @@ export default defineConfig({
       'subscriptions-transport-ws',
     ],
   },
-  alias: {
-    tslib: 'tslib/tslib.es6.js',
-  },
+  resolve:{
+    alias: {
+      tslib: 'tslib/tslib.es6.js',
+    },
+  }
 })
