@@ -126,6 +126,7 @@ importers:
     specifiers:
       '@akryum/workerpool': 6.0.5-alpha.2
       '@babel/core': ^7.20.12
+      '@snoka/config': workspace:^0.0.0
       '@snoka/reactive': workspace:*
       '@snoka/utils': workspace:*
       '@types/chalk': ^2.2.0
@@ -148,6 +149,7 @@ importers:
     dependencies:
       '@akryum/workerpool': 6.0.5-alpha.2
       '@babel/core': 7.20.12
+      '@snoka/config': link:../config
       '@snoka/reactive': link:../reactive
       '@snoka/utils': link:../utils
       '@types/chalk': 2.2.0

@@ -7,9 +7,10 @@ import chalk from 'chalk'
 import type { runTestFile as rawRunTestFile } from './run-test-file'
 import type { RunTestFileOptions, TestSuiteInfo } from './types'
 import { EventType } from './types'
+import { SnokaConfig } from '@snoka/config'
 
 export interface RunnerOptions {
-  targetDirectory: string
+  config: SnokaConfig
   testFiles: ReactiveFileSystem
 }
 
@@ -19,79 +20,78 @@ interface Context {
 
 type EventHandler = (eventType: string, payload: any) => unknown
 
-export async function setupRunner(options: RunnerOptions): Promise<any> {
+export async function setupRunner (options: RunnerOptions) {
   const ctx: Context = {
     options,
   }
 
-  const pool = workerpool.pool(join(__dirname, 'worker.js'))
+  const pool = workerpool.pool(join(__dirname, 'worker.js'), {
+    ...options.config.maxWorkers ? { maxWorkers: options.config.maxWorkers } : {},
+  })
   const { testFiles } = options
 
   const eventHandlers: EventHandler[] = []
 
-  async function runTestFileWorker(options: RunTestFileOptions): ReturnType<typeof rawRunTestFile> {
+  async function runTestFileWorker (options: RunTestFileOptions): ReturnType<typeof rawRunTestFile> {
     const suiteMap: { [id: string]: TestSuiteInfo } = {}
     return pool.exec('runTestFile', [options], {
       on: (eventType, payload) => {
         if (eventType === EventType.BUILD_FAILED) {
           const { error } = payload
           consola.error(`Test build failed: ${error.message}`)
-        }
-        else if (eventType === EventType.BUILD_COMPLETED) {
+        } else if (eventType === EventType.BUILD_COMPLETED) {
           const { testFilePath, duration } = payload
-          consola.info(`Built ${relative(ctx.options.targetDirectory, testFilePath)} in ${duration}ms`)
-        }
-        else if (eventType === EventType.SUITE_START) {
+          consola.info(`Built ${relative(ctx.options.config.targetDirectory, testFilePath)} in ${duration}ms`)
+        } else if (eventType === EventType.SUITE_START) {
           const suite: TestSuiteInfo = payload.suite
           consola.start(suite.title)
           suiteMap[suite.id] = suite
-        }
-        else if (eventType === EventType.SUITE_COMPLETED) {
-          const { duration } = payload
+        } else if (eventType === EventType.SUITE_COMPLETED) {
+          const { duration, suite: { testErrors, otherErrors } } = payload
           const suite = suiteMap[payload.suite.id]
-          consola.log(chalk[payload.suite.errors ? 'red' : 'green'](`  ${suite.tests.length - payload.suite.errors} / ${suite.tests.length} tests passed: ${suite.title} ${chalk.grey(`(${duration}ms)`)}`))
-        }
-        else if (eventType === EventType.TEST_ERROR) {
+          consola.log(chalk[testErrors + otherErrors.length ? 'red' : 'green'](`  ${suite.tests.length - testErrors} / ${suite.tests.length} tests passed: ${suite.title} ${chalk.grey(`(${duration}ms)`)}`))
+        } else if (eventType === EventType.TEST_ERROR) {
           const { duration, error, stack } = payload
           const suite = suiteMap[payload.suite.id]
           const test = suite.tests.find(t => t.id === payload.test.id)
           consola.log(chalk.red(`  ❌️${test.title} ${chalk.grey(`(${duration}ms)`)}`))
           consola.error({ ...error, stack })
-        }
-        else if (eventType === EventType.TEST_SUCCESS) {
+        } else if (eventType === EventType.TEST_SUCCESS) {
           const { duration } = payload
           const suite = suiteMap[payload.suite.id]
           const test = suite.tests.find(t => t.id === payload.test.id)
           consola.log(chalk.green(`  ✔️ ${test.title} ${chalk.grey(`(${duration}ms)`)}`))
         }
 
-        for (const handler of eventHandlers)
+        for (const handler of eventHandlers) {
           handler(eventType, payload)
+        }
       },
     })
   }
 
-  function onEvent(handler: EventHandler) {
+  function onEvent (handler: EventHandler) {
     eventHandlers.push(handler)
   }
 
-  async function runTestFile(relativePath: string) {
+  async function runTestFile (relativePath: string) {
     const file = testFiles.files[relativePath]
     if (file) {
       const result = await runTestFileWorker({
         entry: file.absolutePath,
+        emptySuitesError: ctx.options.config.emptySuiteError,
       })
 
       // Patch filePath
-      result.suites.forEach((s) => {
-        s.filePath = relative(ctx.options.targetDirectory, s.filePath)
+      result.suites.forEach(s => {
+        s.filePath = relative(ctx.options.config.targetDirectory, s.filePath)
       })
 
       return result
     }
   }
 
-  async function close() {
+  async function close () {
     await testFiles.destroy()
     await pool.terminate()
     eventHandlers.length = 0
