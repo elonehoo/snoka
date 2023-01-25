@@ -22,6 +22,7 @@
     "esbuild": "^0.16.17",
     "fs-monkey": "^1.0.3",
     "memfs": "^3.4.13",
+    "mock-require": "^3.0.3",
     "must": "^0.13.4",
     "rollup": "^3.10.0",
     "rollup-plugin-esbuild": "^5.0.0",

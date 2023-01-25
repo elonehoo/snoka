@@ -1,12 +1,12 @@
-import { dirname, join } from 'path'
 import { install as installSourceMap } from 'source-map-support'
 import consola from 'consola'
-import { workerEmit } from '@akryum/workerpool'
-import type { Context, RunTestFileOptions, TestSuiteResult } from './types'
-import { EventType } from './types'
+import { Context, EventType, RunTestFileOptions, TestSuiteResult } from './types'
 import { buildTestFile } from './build'
 import { registerGlobals } from './globals'
 import { runTests } from './run-tests'
+import { workerEmit } from '@akryum/workerpool'
+import mockModule from 'mock-require'
+import { setupRegister } from './test-register'
 
 export async function runTestFile (options: RunTestFileOptions) {
   try {
@@ -14,29 +14,54 @@ export async function runTestFile (options: RunTestFileOptions) {
       options,
       suites: [],
     }
+
+    // Restore mocked module
+    mockModule.stopAll()
+
     const time = Date.now()
-    const { modules } = await buildTestFile(ctx)
-    registerGlobals(ctx, global)
+
+    // Build
+    const {
+      outputPath,
+      modules,
+    } = await buildTestFile(ctx)
+
+    // Globals
+    const register = setupRegister(ctx)
+    registerGlobals(ctx, global, register)
+
+    // Source map support
     installSourceMap()
-    require(join(dirname(ctx.options.entry), '/__output.js'))
+
+    // Execute test file
+    require(outputPath)
+
+    // Register suites and tests
+    await register.run()
+
+    // Run all tests in the test file
     await runTests(ctx)
     const duration = Date.now() - time
+
     workerEmit(EventType.TEST_FILE_COMPLETED, {
       filePath: ctx.options.entry,
       duration,
     })
 
+    // Result data
     const suites: TestSuiteResult[] = ctx.suites.map(s => ({
       id: s.id,
       title: s.title,
       filePath: s.filePath,
-      errors: s.errors,
+      testErrors: s.testErrors,
+      otherErrors: s.otherErrors,
       tests: s.tests.map(t => ({
         id: t.id,
         title: t.title,
         error: t.error,
       })),
     }))
+
     return {
       filePath: options.entry,
       suites,

@@ -136,6 +136,7 @@ importers:
       esbuild: ^0.16.17
       fs-monkey: ^1.0.3
       memfs: ^3.4.13
+      mock-require: ^3.0.3
       must: ^0.13.4
       rollup: ^3.10.0
       rollup-plugin-esbuild: ^5.0.0
@@ -155,6 +156,7 @@ importers:
       esbuild: 0.16.17
       fs-monkey: 1.0.3
       memfs: 3.4.13
+      mock-require: 3.0.3
       must: 0.13.4
       rollup: 3.10.1
       rollup-plugin-esbuild: 5.0.0_hw2j6smmsnfcrxj5uwrlxbef3m
@@ -4198,6 +4200,10 @@ packages:
     engines: {node: '>=6.9.0'}
     dev: false
 
+  /get-caller-file/1.0.3:
+    resolution: {integrity: sha512-3t6rVToeoZfYSGd8YoLFR2DJkiQrIiUrGcjvFX2mDw3bn6k2OtwHN0TNCLbBO+w8qTvimhDkv+LSscbJY1vE6w==}
+    dev: false
+
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
@@ -5047,6 +5053,14 @@ packages:
     hasBin: true
     dev: true
 
+  /mock-require/3.0.3:
+    resolution: {integrity: sha512-lLzfLHcyc10MKQnNUCv7dMcoY/2Qxd6wJfbqCcVk3LDb8An4hF6ohk5AztrvgKhJCqj36uyzi/p5se+tvyD+Wg==}
+    engines: {node: '>=4.3.0'}
+    dependencies:
+      get-caller-file: 1.0.3
+      normalize-path: 2.1.1
+    dev: false
+
   /ms/2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
     dev: false
@@ -5181,6 +5195,13 @@ packages:
       semver: 5.7.1
       validate-npm-package-license: 3.0.4
     dev: true
+
+  /normalize-path/2.1.1:
+    resolution: {integrity: sha512-3pKJwH184Xo/lnH6oyP1q2pMd7HcypqqmRs91/6/i2CGtWwIKGCkOOMTm/zXbgTEWHw1uNpNi/igc3ePOYHb6w==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      remove-trailing-separator: 1.1.0
+    dev: false
 
   /normalize-path/3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -5724,6 +5745,10 @@ packages:
     dependencies:
       jsesc: 0.5.0
     dev: true
+
+  /remove-trailing-separator/1.1.0:
+    resolution: {integrity: sha512-/hS+Y0u3aOfIETiaiirUFwDBDzmXPvO+jAfKTitUngIPzdKc6Z0LoFjM/CK5PL4C+eKwHohlHAb6H0VFfmmUsw==}
+    dev: false
 
   /require-directory/2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}

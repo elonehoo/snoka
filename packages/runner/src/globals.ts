@@ -1,73 +1,20 @@
 import sinon from 'sinon'
 import must from 'must'
-import shortid from 'shortid'
-import type { Context, TestSuite } from './types'
+import { Context } from './types'
 import { createSnokaGlobal } from './global'
+import { Register } from './test-register'
 
-export function registerGlobals(ctx: Context, target: any) {
-  target.snoka = createSnokaGlobal(ctx)
+export function registerGlobals (ctx: Context, target: any, register: Register) {
+  // Global objects
+  target.peeky = createSnokaGlobal(ctx)
   target.expect = must
   target.sinon = sinon
 
-  let currentSuite: TestSuite
-
-  target.describe = (title: string, handler: () => unknown) => {
-    if (currentSuite)
-      throw new Error('Nested describe() calls are not supported yet')
-
-    currentSuite = {
-      id: shortid(),
-      title,
-      filePath: ctx.options.entry,
-      tests: [],
-      beforeAllHandlers: [],
-      beforeEachHandlers: [],
-      afterAllHandlers: [],
-      afterEachHandlers: [],
-      errors: 0,
-    }
-    ctx.suites.push(currentSuite)
-    handler()
-    currentSuite = null
-  }
-
-  target.it = target.test = (title: string, handler: () => unknown) => {
-    if (!currentSuite)
-      throw new Error('test() must be used inside the describe() handler')
-
-    currentSuite.tests.push({
-      id: shortid(),
-      title,
-      handler,
-      error: null,
-    })
-  }
-
-  target.beforeAll = (handler: () => unknown) => {
-    if (!currentSuite)
-      throw new Error('beforeAll() must be used inside the describe() handler')
-
-    currentSuite.beforeAllHandlers.push(handler)
-  }
-
-  target.afterAll = (handler: () => unknown) => {
-    if (!currentSuite)
-      throw new Error('afterAll() must be used inside the describe() handler')
-
-    currentSuite.afterAllHandlers.push(handler)
-  }
-
-  target.beforeEach = (handler: () => unknown) => {
-    if (!currentSuite)
-      throw new Error('beforeEach() must be used inside the describe() handler')
-
-    currentSuite.beforeEachHandlers.push(handler)
-  }
-
-  target.afterEach = (handler: () => unknown) => {
-    if (!currentSuite)
-      throw new Error('afterEach() must be used inside the describe() handler')
-
-    currentSuite.afterEachHandlers.push(handler)
-  }
+  // Register
+  target.describe = register.exposed.describe
+  target.it = target.test = register.exposed.test
+  target.beforeAll = register.exposed.beforeAll
+  target.afterAll = register.exposed.afterAll
+  target.beforeEach = register.exposed.beforeEach
+  target.afterEach = register.exposed.afterEach
 }
