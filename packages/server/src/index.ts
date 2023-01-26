@@ -1,7 +1,8 @@
-import { join } from 'path'
+import { dirname, join } from 'path'
 import HTTP from 'http'
 import { createReactiveFileSystem } from '@snoka/reactive'
 import { ApolloServer, PubSub } from 'apollo-server-express'
+import historyFallback from 'express-history-api-fallback'
 import express from 'express'
 import { makeSchema } from 'nexus'
 import consola from 'consola'
@@ -68,6 +69,10 @@ export async function createServer () {
     path: '/api',
   })
   apollo.installSubscriptionHandlers(http)
+
+  const staticRoot = join(dirname(require.resolve('@snoka/client-dist/package.json')), 'dist')
+  app.use(express.static(staticRoot))
+  app.use(historyFallback('index.html', { root: staticRoot }))
 
   // (Don't await)
   run(createContext(), {

@@ -7,7 +7,7 @@
   "keywords": [],
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build --emptyOutDir"
   },
   "dependencies": {
     "@apollo/client": "^3.7.4",

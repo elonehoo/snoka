@@ -16,6 +16,7 @@
     "build:fix": "esno scripts/postbuild.ts && cp src/context.d.ts dist/context.d.d.ts"
   },
   "dependencies": {
+    "@snoka/client-dist": "workspace:*",
     "@snoka/config": "workspace:*",
     "@snoka/reactive": "workspace:*",
     "@snoka/runner": "workspace:*",
@@ -23,6 +24,7 @@
     "chokidar": "^3.5.3",
     "consola": "^2.15.3",
     "express": "^4.18.2",
+    "express-history-api-fallback": "^2.2.1",
     "graphql": "^15.4.0",
     "launch-editor": "^2.6.0",
     "nexus": "^1.3.0",
