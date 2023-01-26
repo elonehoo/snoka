@@ -6,12 +6,17 @@ input ClearRunInput {
   id: ID!
 }
 
+"""JSON custom scalar type"""
+scalar Json
+
 type Mutation {
   clearRun(input: ClearRunInput!): Run!
   clearRuns: Boolean!
+  openFileInEditor(col: Int!, line: Int!, path: String!): Boolean
   openTestFileInEditor(col: Int!, id: ID!, line: Int!): Boolean
   startRun(input: StartRunInput!): Run!
   updateSettings(input: UpdateSettingsInput!): Settings!
+  updateSnapshot(input: UpdateSnapshotInput!): Snapshot
 }
 
 type Query {
@@ -21,28 +26,43 @@ type Query {
   settings: Settings!
   testFile(id: ID!): TestFile
   testFiles: [TestFile!]!
+  testSuiteById(id: ID!): TestSuite
 }
 
 type Run {
-  duration: Int
+  allTestSuites: [TestSuite!]!
+  date: String!
+  duration: Float
   emoji: String!
+  failedSnapshotCount: Int!
+  failedSnapshots: [Snapshot!]!
   id: ID!
+  newSnapshots: [Snapshot!]!
+  nextSnapshot(id: ID!): Snapshot
+  passedSnapshots: [Snapshot!]!
+  previousErrorRunTestFiles: [RunTestFile!]!
+  previousSnapshot(id: ID!): Snapshot
   progress: Float!
+  rootTestSuites: [TestSuite!]!
   runTestFile(slug: String!): RunTestFile
   runTestFiles: [RunTestFile!]!
+  snapshotById(id: ID!): Snapshot
+  snapshotCount: Int!
   status: Status!
-  testSuites: [TestSuite!]!
-  title: String!
+  testCount(status: Status): Int!
+  testSuiteById(id: ID!): TestSuite
+  testSuiteBySlug(slug: String!): TestSuite
 }
 
 type RunTestFile {
-  buildDuration: Int
-  duration: Int
+  allTestSuites: [TestSuite!]!
+  duration: Float
+  envName: String
   error: RunTestFileError
   id: ID!
+  rootTestSuites: [TestSuite!]!
   slug: String!
   status: Status!
-  suites: [TestSuite!]!
   testFile: TestFile!
 }
 
@@ -51,8 +71,21 @@ type RunTestFileError {
 }
 
 type Settings {
+  darkMode: Boolean!
   id: ID!
   watch: Boolean!
+}
+
+type Snapshot {
+  col: Int
+  content: String!
+  failed: Boolean!
+  id: ID!
+  line: Int
+  newContent: String
+  test: Test!
+  title: String!
+  updated: Boolean
 }
 
 input StartRunInput {
@@ -61,15 +94,16 @@ input StartRunInput {
 
 enum Status {
   error
-  idle
   in_progress
   skipped
   success
+  todo
 }
 
 type Subscription {
   runAdded: Run!
   runRemoved: Run!
+  runStatsUpdated(runId: ID!): Run
   runTestFileUpdated: RunTestFile!
   runUpdated: Run!
   testAdded(runId: ID!, runTestFileId: ID): Test!
@@ -77,20 +111,34 @@ type Subscription {
   testFileRemoved: TestFile!
   testFileUpdated: TestFile!
   testSuiteAdded(runId: ID!, runTestFileId: ID): TestSuite!
+  testSuiteCompleted(runId: ID!, runTestFileId: ID): TestSuite!
   testSuiteUpdated(runId: ID!, runTestFileId: ID): TestSuite!
-  testUpdated(runId: ID!, runTestFileId: ID): Test!
+  testUpdatedBySlug(runId: ID!, testSlug: String!): Test!
+  testUpdatedInRun(runId: ID!, runTestFileId: ID): Test!
 }
 
 type Test {
-  duration: Int
+  duration: Float
+  envResult: Json
   error: TestError
+  failedSnapshotCount: Int!
+  flag: TestFlag
+  hasLogs: Boolean!
   id: ID!
+  logs: [TestLog!]!
+  previewImports: [String]
+  slug: String!
+  snapshotCount: Int!
+  snapshots: [Snapshot!]!
   status: Status!
+  suite: TestSuite!
   title: String!
 }
 
 type TestError {
+  actual: String
   col: Int
+  expected: String
   line: Int
   message: String!
   snippet: String
@@ -99,21 +147,51 @@ type TestError {
 
 type TestFile {
   deleted: Boolean!
-  duration: Int
+  duration: Float
   id: ID!
   relativePath: String!
   status: Status!
 }
 
+enum TestFlag {
+  only
+  skip
+  todo
+}
+
+type TestLog {
+  text: String!
+  type: TestLogType!
+}
+
+enum TestLogType {
+  stderr
+  stdout
+}
+
 type TestSuite {
-  duration: Int
+  allTitles: [String]!
+  childCount: Int!
+  children: [TestSuiteChild!]!
+  duration: Float
   id: ID!
+  parentSuite: TestSuite
+  root: Boolean!
   runTestFile: RunTestFile!
+  slug: String!
   status: Status!
-  tests: [Test]!
+  testById(id: ID!): Test
+  testBySlug(slug: String!): Test
   title: String!
 }
 
+union TestSuiteChild = Test | TestSuite
+
 input UpdateSettingsInput {
+  darkMode: Boolean!
   watch: Boolean!
+}
+
+input UpdateSnapshotInput {
+  id: ID!
 }

@@ -1,26 +1,27 @@
-import { join } from 'path'
-import { extendType, idArg, intArg, nonNull, objectType } from 'nexus'
+import { join, normalize } from 'pathe'
+import glob from 'fast-glob'
+import chokidar from 'chokidar'
+import { extendType, idArg, intArg, nonNull, objectType, stringArg } from 'nexus'
 import launchEditor from 'launch-editor'
 import type { Context } from '../context'
-import type { StatusEnum } from './Status'
-import { Status } from './Status'
+import { Status, StatusEnum } from './Status.js'
 
 export const TestFile = objectType({
   name: 'TestFile',
-  definition(t) {
+  definition (t) {
     t.nonNull.id('id')
     t.nonNull.string('relativePath')
     t.nonNull.field('status', {
       type: Status,
     })
     t.nonNull.boolean('deleted')
-    t.int('duration')
+    t.float('duration')
   },
 })
 
 export const TestFileQuery = extendType({
   type: 'Query',
-  definition(t) {
+  definition (t) {
     t.nonNull.list.field('testFiles', {
       type: nonNull(TestFile),
       resolve: () => testFiles.filter(f => !f.deleted),
@@ -38,7 +39,7 @@ export const TestFileQuery = extendType({
 
 export const TestFileMutation = extendType({
   type: 'Mutation',
-  definition(t) {
+  definition (t) {
     t.boolean('openTestFileInEditor', {
       args: {
         id: nonNull(idArg()),
@@ -48,6 +49,18 @@ export const TestFileMutation = extendType({
       resolve: (root, { id, line, col }) => {
         const testFile = testFiles.find(f => f.id === id)
         launchEditor(`${testFile.absolutePath}:${line}:${col}`)
+        return true
+      },
+    })
+
+    t.boolean('openFileInEditor', {
+      args: {
+        path: nonNull(stringArg()),
+        line: nonNull(intArg()),
+        col: nonNull(intArg()),
+      },
+      resolve: (root, { path, line, col }) => {
+        launchEditor(`${path}:${line}:${col}`)
         return true
       },
     })
@@ -75,7 +88,7 @@ interface TestFileRemovedPayload {
 export const TestFileSubscription = extendType({
   type: 'Subscription',
 
-  definition(t) {
+  definition (t) {
     t.field('testFileAdded', {
       type: nonNull(TestFile),
       subscribe: (_, args, ctx) => ctx.pubsub.asyncIterator(TestFileAdded),
@@ -103,31 +116,44 @@ export interface TestFileData {
   status: StatusEnum
   deleted: boolean
   duration: number
-  modules: string[]
+  deps: string[]
 }
 
 export let testFiles: TestFileData[] = []
 
-export async function loadTestFiles(ctx: Context) {
-  testFiles = ctx.reactiveFs.list().map(path => createTestFile(ctx, path))
+export async function loadTestFiles (ctx: Context) {
+  testFiles = (await glob(ctx.config.match, {
+    cwd: ctx.config.targetDirectory,
+    ignore: Array.isArray(ctx.config.ignored) ? ctx.config.ignored : [ctx.config.ignored],
+  })).map(path => createTestFile(ctx, normalize(path)))
 
-  ctx.reactiveFs.onFileAdd(async (relativePath) => {
+  const watcher = chokidar.watch(ctx.config.match, {
+    cwd: ctx.config.targetDirectory,
+    ignored: ctx.config.ignored,
+    ignoreInitial: true,
+  })
+
+  async function onFileChange (relativePath: string) {
+    relativePath = normalize(relativePath)
     let testFile: TestFileData = testFiles.find(f => f.relativePath === relativePath)
     if (testFile) {
       await updateTestFile(ctx, testFile.id, {
         deleted: false,
       })
-    }
-    else {
+    } else {
       testFile = createTestFile(ctx, relativePath)
       testFiles.push(testFile)
     }
     ctx.pubsub.publish(TestFileAdded, {
       testFile,
     } as TestFileAddedPayload)
-  })
+  }
 
-  ctx.reactiveFs.onFileRemove((relativePath) => {
+  watcher.on('add', file => onFileChange(file))
+  watcher.on('change', file => onFileChange(file))
+
+  watcher.on('unlink', (relativePath) => {
+    relativePath = normalize(relativePath)
     const testFile = testFiles.find(f => f.relativePath === relativePath)
     if (testFile) {
       testFile.deleted = true
@@ -136,9 +162,17 @@ export async function loadTestFiles(ctx: Context) {
       } as TestFileRemovedPayload)
     }
   })
+
+  async function destroy () {
+    await watcher.close()
+  }
+
+  return {
+    destroy,
+  }
 }
 
-export async function updateTestFile(ctx: Context, id: string, data: Partial<Omit<TestFileData, 'id'>>) {
+export async function updateTestFile (ctx: Context, id: string, data: Partial<Omit<TestFileData, 'id'>>) {
   const testFile = testFiles.find(f => f.id === id)
   Object.assign(testFile, data)
   ctx.pubsub.publish(TestFileUpdated, {
@@ -147,14 +181,14 @@ export async function updateTestFile(ctx: Context, id: string, data: Partial<Omi
   return testFile
 }
 
-function createTestFile(ctx: Context, relativePath: string): TestFileData {
+function createTestFile (ctx: Context, relativePath: string): TestFileData {
   return {
     id: relativePath,
     relativePath,
     absolutePath: join(ctx.config.targetDirectory, relativePath),
-    status: 'idle',
+    status: 'in_progress',
     deleted: false,
     duration: null,
-    modules: [],
+    deps: [],
   }
 }

@@ -1,20 +1,27 @@
-import { relative } from 'path'
+import { relative } from 'pathe'
+import fs from 'fs-extra'
+import { fileURLToPath } from 'url'
+import { performance } from 'perf_hooks'
 import { arg, extendType, idArg, inputObjectType, nonNull, objectType } from 'nexus'
-import shortid from 'shortid'
-import { EventType, getStats, setupRunner } from '@snoka/runner'
-import nameGenerator from 'project-name-generator'
-import randomEmoji from 'random-emoji'
+import { nanoid } from 'nanoid'
+import { setupRunner, getStats, Runner } from '@snoka/runner'
+import randomEmoji from '@sefinek/random-emoji'
+import objectInspect from 'object-inspect'
 import type { Context } from '../context'
-import { formatRunTestFileErrorMessage, getErrorPosition, getSrcFile } from '../util'
-import type { StatusEnum } from './Status'
-import { Status } from './Status'
-import { testFiles, updateTestFile } from './TestFile'
-import { clearTestSuites, createTestSuite, testSuites, updateTestSuite } from './TestSuite'
-import { updateTest } from './Test'
-import type { RunTestFileData } from './RunTestFile'
-import { updateRunTestFile } from './RunTestFile'
-import { settings } from './Settings'
-import { mightRunOnChangedFiles } from '../watch'
+import { Status, StatusEnum } from './Status.js'
+import { updateTestFile, testFiles } from './TestFile.js'
+import { clearTestSuites, createTestSuite, updateTestSuite, testSuites } from './TestSuite.js'
+import { clearTests, updateTest } from './Test.js'
+import { RunTestFileData, updateRunTestFile } from './RunTestFile.js'
+import { getErrorPosition, getSrcFile, formatRunTestFileErrorMessage } from '../util.js'
+import { settings } from './Settings.js'
+import { mightRunOnChangedFiles } from '../watch.js'
+import { toProgramConfig } from '@snoka/config'
+import { addSnapshots, clearSnapshots, getSnapshot, SnapshotData, toSnapshotData } from './Snapshot.js'
+
+const __filename = fileURLToPath(import.meta.url)
+
+const MAX_RUNS = 10
 
 export const Run = objectType({
   name: 'Run',
@@ -24,13 +31,13 @@ export const Run = objectType({
   },
   definition (t) {
     t.nonNull.id('id')
-    t.nonNull.string('title')
+    t.nonNull.string('date')
     t.nonNull.string('emoji')
     t.nonNull.float('progress')
     t.nonNull.field('status', {
       type: Status,
     })
-    t.int('duration')
+    t.float('duration')
   },
 })
 
@@ -47,7 +54,7 @@ export const RunQuery = extendType({
       args: {
         id: nonNull(idArg()),
       },
-      resolve: (_, { id }) => runs.find(r => r.id === id),
+      resolve: (_, { id }) => runs.find(r => r.id === getRunId(id)),
     })
 
     t.field('lastRun', {
@@ -151,12 +158,16 @@ export const RunSubscription = extendType({
 
 export interface RunData {
   id: string
-  title: string
+  date: string
   emoji: string
   progress: number
   status: StatusEnum
   duration: number
   runTestFiles: RunTestFileData[]
+  previousErrorRunTestFiles: RunTestFileData[]
+  failedSnapshots: SnapshotData[]
+  passedSnapshots: SnapshotData[]
+  newSnapshots: SnapshotData[]
 }
 
 export let runs: RunData[] = []
@@ -166,30 +177,46 @@ export interface CreateRunOptions {
 }
 
 export async function createRun (ctx: Context, options: CreateRunOptions) {
-  const runId = shortid()
+  const runId = nanoid()
 
   const testFilesRaw = options.testFileIds ? testFiles.filter(f => options.testFileIds.includes(f.id)) : [...testFiles]
   const runTestFiles: RunTestFileData[] = testFilesRaw.map(f => ({
-    id: shortid(),
+    id: nanoid(),
     slug: f.relativePath.replace(/([\\/.])/g, '-'),
     runId,
     testFile: f,
     status: 'in_progress',
     duration: null,
-    buildDuration: null,
     error: null,
   }))
 
+  const previousRun = runs[runs.length - 1]
+  const previousErrorRunTestFiles = []
+  if (previousRun) {
+    previousErrorRunTestFiles.push(...previousRun.runTestFiles.filter(f =>
+      f.status === 'error' && !runTestFiles.some(tf => tf.testFile.id === f.testFile.id)))
+    previousErrorRunTestFiles.push(...previousRun.previousErrorRunTestFiles.filter(f =>
+      !runTestFiles.some(tf => tf.testFile.id === f.testFile.id)))
+  }
+
   const run: RunData = {
     id: runId,
-    title: nameGenerator().dashed,
-    emoji: randomEmoji.random({ count: 1 })[0].character,
+    date: new Date().toISOString(),
+    emoji: randomEmoji.unicode(),
     progress: 0,
     status: 'in_progress',
     duration: null,
-    runTestFiles: runTestFiles,
+    runTestFiles,
+    previousErrorRunTestFiles,
+    failedSnapshots: [],
+    passedSnapshots: [],
+    newSnapshots: [],
   }
   runs.push(run)
+
+  if (runs.length > MAX_RUNS) {
+    runs.shift()
+  }
 
   ctx.pubsub.publish(RunAdded, {
     run,
@@ -199,12 +226,16 @@ export async function createRun (ctx: Context, options: CreateRunOptions) {
 }
 
 export async function getRun (ctx: Context, id: string) {
-  const run = runs.find(r => r.id === id)
+  const run = (id === 'last-run') ? runs[runs.length - 1] : runs.find(r => r.id === id)
   if (run) {
     return run
   } else {
     throw new Error(`Run ${id} not found`)
   }
+}
+
+export function getRunId (id: string) {
+  return ((id === 'last-run') ? runs[runs.length - 1] : runs.find(r => r.id === id))?.id
 }
 
 export async function updateRun (ctx: Context, id: string, data: Partial<Omit<RunData, 'id'>>) {
@@ -216,6 +247,8 @@ export async function updateRun (ctx: Context, id: string, data: Partial<Omit<Ru
   return run
 }
 
+let runner: Runner
+
 export async function startRun (ctx: Context, id: string) {
   const run = await getRun(ctx, id)
 
@@ -224,62 +257,97 @@ export async function startRun (ctx: Context, id: string) {
     updateRunTestFile(ctx, run.id, f.id, { status: 'in_progress' })
   }))
 
-  const time = Date.now()
-  const runner = await setupRunner({
-    targetDirectory: ctx.config.targetDirectory,
-    testFiles: ctx.reactiveFs,
-  })
-  runner.onEvent(async (eventType, payload) => {
-    if (eventType === EventType.BUILD_COMPLETED) {
-      const { testFilePath, duration } = payload
-      const testFileId = relative(ctx.config.targetDirectory, testFilePath)
-      const runTestFileId = run.runTestFiles.find(rf => rf.testFile.id === testFileId)?.id
-      updateRunTestFile(ctx, run.id, runTestFileId, {
-        buildDuration: duration,
-      })
-    } else if (eventType === EventType.SUITE_START) {
-      const { suite } = payload
-      const testFileId = relative(ctx.config.targetDirectory, suite.filePath)
-      createTestSuite(ctx, {
-        id: suite.id,
-        runId: run.id,
-        runTestFile: run.runTestFiles.find(rf => rf.testFile.id === testFileId),
-        title: suite.title,
-        tests: suite.tests,
-      })
-    } else if (eventType === EventType.SUITE_COMPLETED) {
-      const { suite, duration } = payload
-      const suiteData = testSuites.find(s => s.id === suite.id)
-      updateTestSuite(ctx, suite.id, {
-        status: !suiteData.tests.length ? 'skipped' : suite.errors ? 'error' : 'success',
-        duration,
-      })
-    } else if (eventType === EventType.TEST_START) {
-      const { suite, test } = payload
-      updateTest(ctx, suite.id, test.id, {
-        status: 'in_progress',
-      })
-    } else if (eventType === EventType.TEST_SUCCESS) {
-      const { suite, test, duration } = payload
-      updateTest(ctx, suite.id, test.id, {
+  clearSnapshots()
+
+  const time = performance.now()
+  if (!runner) {
+    runner = await setupRunner({
+      config: toProgramConfig(ctx.config),
+      reporters: [],
+    })
+  } else {
+    runner.clearOnMessage()
+  }
+  runner.onMessage(async (message) => {
+    if (message.method === 'onCollected') {
+      const [suites] = message.args
+      for (const suite of suites) {
+        const testFileId = relative(ctx.config.targetDirectory, suite.filePath)
+        await createTestSuite(ctx, {
+          id: suite.id,
+          title: suite.title,
+          allTitles: suite.allTitles,
+          flag: suite.flag,
+          children: suite.children,
+        }, {
+          // Additional data
+          runId: run.id,
+          runTestFile: run.runTestFiles.find(rf => rf.testFile.id === testFileId),
+          status: 'in_progress',
+          parent: null,
+        })
+      }
+    } else if (message.method === 'onSuiteComplete') {
+      const [suiteData, duration, completedTests] = message.args
+      const suite = testSuites.find(s => s.id === suiteData.id)
+      await Promise.all(suite.children.filter(child => !('children' in child) && completedTests[child.id]).map(child => updateTest(ctx, suite.id, child.id, {
         status: 'success',
+        duration: completedTests[child.id],
+      })))
+      await updateTestSuite(ctx, suiteData.id, {
+        status: !suite.children.length ? 'skipped' : suiteData.testErrors + suiteData.otherErrors.length ? 'error' : 'success',
         duration,
       })
-    } else if (eventType === EventType.TEST_ERROR) {
-      const { suite, test, duration, error, stack } = payload
-      const testFile = testSuites.find(s => s.id === suite.id).runTestFile.testFile
-      const { line, col } = getErrorPosition(testFile.relativePath, stack)
-      const lineSource = (await ctx.reactiveFs.files[testFile.relativePath].waitForContent).split('\n')[line - 1]
-      updateTest(ctx, suite.id, test.id, {
+    } else if (message.method === 'onTestError') {
+      const [suiteId, testId, duration, error] = message.args
+      const testFile = testSuites.find(s => s.id === suiteId).runTestFile.testFile
+      const { line, col } = getErrorPosition(testFile.relativePath, error.stack)
+      const lineSource = fs.existsSync(testFile.absolutePath) ? (await fs.readFile(testFile.absolutePath, 'utf8')).split('\n')[line - 1] : ''
+      await updateTest(ctx, suiteId, testId, {
         status: 'error',
         duration,
         error: {
           message: error.message,
-          stack: stack,
+          stack: error.stack,
           snippet: lineSource.trim(),
           line,
           col,
+          expected: error.matcherResult?.expected ? stringifyJS(error.matcherResult.expected) : null,
+          actual: error.matcherResult?.actual ? stringifyJS(error.matcherResult.actual) : null,
         },
+      })
+    } else if (message.method === 'onLog') {
+      const [suiteId, testId, type, text] = message.args
+      if (testId) {
+        await updateTest(ctx, suiteId, testId, (test) => {
+          const logs = test.logs
+          logs.push({
+            type,
+            text,
+          })
+          return {
+            logs,
+          }
+        })
+      } else {
+        process[type].write(text)
+      }
+    } else if (message.method === 'onTestSnapshotsProcessed') {
+      const [suiteId, testId, snapshots] = message.args
+      const testFile = testSuites.find(s => s.id === suiteId).runTestFile.testFile
+      await updateTest(ctx, suiteId, testId, (test) => {
+        const list: SnapshotData[] = snapshots.map(s => toSnapshotData(s, test, testFile))
+        test.snapshots.push(...list)
+        addSnapshots(list)
+        return {
+          snapshots: test.snapshots,
+          failedSnapshotCount: test.failedSnapshotCount + snapshots.filter(s => !!s.newContent).length,
+        }
+      })
+    } else if (message.method === 'onTestEnvResult') {
+      const [suiteId, testId, envResult] = message.args
+      await updateTest(ctx, suiteId, testId, {
+        envResult,
       })
     }
   })
@@ -289,17 +357,21 @@ export async function startRun (ctx: Context, id: string) {
 
     const results = await Promise.all(run.runTestFiles.map(async f => {
       try {
-        const result = await runner.runTestFile(f.testFile.relativePath)
+        const result = await runner.runTestFile(f.testFile.relativePath, f.testFile.deps)
         const stats = getStats([result])
-        const status: StatusEnum = !stats.testCount ? 'skipped' : stats.errorTestCount > 0 ? 'error' : 'success'
+        let status: StatusEnum = !stats.testCount ? 'skipped' : stats.errorTestCount > 0 ? 'error' : 'success'
+        if (!stats.testCount && result.suites.some(s => hasTodo(s))) {
+          status = 'todo'
+        }
         await updateTestFile(ctx, f.testFile.id, {
           status,
           duration: result.duration,
-          modules: result.modules,
+          deps: result.deps,
         })
         await updateRunTestFile(ctx, run.id, f.id, {
           status,
           duration: result.duration,
+          envName: result.env.name,
         })
         completed++
         await updateRun(ctx, run.id, {
@@ -324,7 +396,10 @@ export async function startRun (ctx: Context, id: string) {
     const stats = getStats(results)
     await updateRun(ctx, id, {
       status: stats.errorTestCount > 0 ? 'error' : 'success',
-      duration: Date.now() - time,
+      duration: performance.now() - time,
+      failedSnapshots: stats.failedSnapshots.map(s => getSnapshot(s.id)),
+      passedSnapshots: stats.passedSnapshots.map(s => getSnapshot(s.id)),
+      newSnapshots: stats.newSnapshots.map(s => getSnapshot(s.id)),
     })
 
     if (settings.watch) {
@@ -349,6 +424,7 @@ export async function clearRun (ctx: Context, id: string) {
     runs.splice(index, 1)
   }
   clearTestSuites(ctx, id)
+  clearTests(ctx, id)
   ctx.pubsub.publish(RunRemoved, {
     run,
   } as RunRemovedPayload)
@@ -357,10 +433,25 @@ export async function clearRun (ctx: Context, id: string) {
 
 export function clearRuns (ctx: Context) {
   clearTestSuites(ctx)
+  clearTests(ctx)
+  clearSnapshots()
   runs = []
   return true
 }
 
 export function isRunning () {
   return runs[runs.length - 1]?.status === 'in_progress'
+}
+
+function stringifyJS (object: any) {
+  return objectInspect(object, {
+    depth: 32,
+    indent: 2,
+  })
+}
+
+function hasTodo (child: any) {
+  if (child.flag === 'todo') return true
+  if ('children' in child && child.children.some(c => hasTodo(c[1]))) return true
+  return false
 }

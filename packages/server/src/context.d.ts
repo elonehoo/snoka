@@ -1,9 +1,10 @@
-import { ReactiveFileSystem } from '@peeky/reactive-fs'
-import { PubSubEngine } from 'apollo-server-express'
-import { SnokaConfig } from '@snoka/config/dist'
+import type { PubSubEngine } from 'apollo-server-express'
+import type { SnokaConfig } from '@snoka/config/dist'
+import type { ViteDevServer } from 'vite'
 
 export interface Context {
   config: SnokaConfig
-  reactiveFs: ReactiveFileSystem
   pubsub: PubSubEngine
+  vitePort: number
+  viteServer: ViteDevServer
 }
