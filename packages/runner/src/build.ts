@@ -1,53 +1,18 @@
-import fs from 'fs'
-import { dirname, join, relative } from 'path'
-import esbuild from 'rollup-plugin-esbuild'
+import esbuild from '@akryum/rollup-plugin-esbuild'
 import { rollup } from 'rollup'
-import { fs as memfs } from 'memfs'
-import { ufs } from 'unionfs'
-import { patchFs, patchRequire } from 'fs-monkey'
+import { dirname, join, relative } from 'path'
 import { workerEmit } from '@akryum/workerpool'
-import type { Context } from './types'
-import { EventType } from './types'
+import { Context, EventType } from './types'
+import shortid from 'shortid'
+import { fs, realFs } from './fs'
+import { ensureESBuildService } from '@snoka/utils'
 
-const originalFs = { ...fs }
-let mockedFs = false
-
-export function mockFileSystem() {
-  if (mockedFs)
-    return
-  mockedFs = true
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-expect-error
-  ufs.use(originalFs).use(memfs)
-  // Patch unionfs to write to memfs only
-  Object.assign(ufs, {
-    unwatchFile: originalFs.unwatchFile,
-    mkdir: memfs.mkdir,
-    mkdirSync: memfs.mkdirSync,
-    write: memfs.write,
-    writeFile: (path, ...args) => {
-      memfs.mkdirpSync(dirname(path))
-      // @ts-expect-error
-      return memfs.writeFile(path, ...args)
-    },
-    writeFileSync: (path, ...args) => {
-      memfs.mkdirpSync(dirname(path))
-      // @ts-expect-error
-      return memfs.writeFileSync(path, ...args)
-    },
-  })
-  patchFs(ufs)
-  patchRequire(ufs)
-}
-
-export async function buildTestFile(ctx: Context) {
-  mockFileSystem()
-
+export async function buildTestFile (ctx: Context) {
   const targetDir = dirname(ctx.options.entry)
 
   try {
     // Ensure target directory
-    memfs.mkdirSync(targetDir, { recursive: true })
+    fs.mkdirSync(targetDir, { recursive: true })
 
     // Rollup cache
     const cachePath = getCachePath(ctx.options.entry)
@@ -57,11 +22,16 @@ export async function buildTestFile(ctx: Context) {
       testFilePath: ctx.options.entry,
     })
 
+    const outputFile = `test-${shortid()}.js`
+    const outputPath = join(targetDir, outputFile)
+
     const time = Date.now()
+    const esbuildService = await ensureESBuildService()
     const bundle = await rollup({
       input: ctx.options.entry,
       plugins: [
         esbuild({
+          service: esbuildService,
           tsconfig: join(process.cwd(), 'tsconfig.json'),
           minify: false,
         }),
@@ -72,16 +42,15 @@ export async function buildTestFile(ctx: Context) {
       cache,
     })
 
-    saveBuildCache(ctx, cachePath, bundle.cache)
-
     const rollupOutput = await bundle.write({
       dir: targetDir,
-      entryFileNames: '__output.js',
+      entryFileNames: outputFile,
       format: 'cjs',
       sourcemap: true,
     })
     const modules = Object.keys(rollupOutput.output[0].modules)
 
+    saveBuildCache(ctx, cachePath, bundle.cache)
     await bundle.close()
 
     workerEmit(EventType.BUILD_COMPLETED, {
@@ -91,10 +60,10 @@ export async function buildTestFile(ctx: Context) {
     })
 
     return {
+      outputPath,
       modules,
     }
-  }
-  catch (e) {
+  } catch (e) {
     workerEmit(EventType.BUILD_FAILED, {
       testFilePath: ctx.options.entry,
       error: e,
@@ -103,18 +72,17 @@ export async function buildTestFile(ctx: Context) {
   }
 }
 
-export function getCachePath(filePath: string) {
+export function getCachePath (filePath: string) {
   const cacheKey = relative(process.cwd(), filePath).replace(/(\/|\.)/g, '_')
-  return join(process.cwd(), 'node_modules', '.temp', 'peeky-build-cache', `${cacheKey}.json`)
+  return join(process.cwd(), 'node_modules', '.temp', 'peeky-build-cache', cacheKey + '.json')
 }
 
-export function loadBuildCache(ctx: Context, cachePath: string) {
+export function loadBuildCache (ctx: Context, cachePath: string) {
   let cache
-  if (fs.existsSync(cachePath)) {
+  if (realFs.existsSync(cachePath)) {
     try {
-      cache = JSON.parse(fs.readFileSync(cachePath, 'utf8'))
-    }
-    catch (e) {
+      cache = JSON.parse(realFs.readFileSync(cachePath, 'utf8'))
+    } catch (e) {
       workerEmit(EventType.CACHE_LOAD_FAILED, {
         filePath: ctx.options.entry,
         error: e,
@@ -125,18 +93,17 @@ export function loadBuildCache(ctx: Context, cachePath: string) {
   return cache
 }
 
-export function saveBuildCache(ctx: Context, cachePath: string, cacheData: any) {
+export function saveBuildCache (ctx: Context, cachePath: string, cacheData: any) {
   try {
-    originalFs.mkdirSync(dirname(cachePath), {
+    realFs.mkdirSync(dirname(cachePath), {
       recursive: true,
     })
-    originalFs.writeFileSync(cachePath, JSON.stringify(cacheData), { encoding: 'utf8' })
+    realFs.writeFileSync(cachePath, JSON.stringify(cacheData), { encoding: 'utf8' })
     workerEmit(EventType.CACHE_SAVE_SUCCESS, {
       filePath: ctx.options.entry,
       cachePath,
     })
-  }
-  catch (e) {
+  } catch (e) {
     workerEmit(EventType.CACHE_SAVE_FAILED, {
       filePath: ctx.options.entry,
       error: e,

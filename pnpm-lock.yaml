@@ -38,9 +38,10 @@ importers:
 
   packages/cli:
     specifiers:
-      '@snoka/config': workspace:^0.0.0
+      '@snoka/config': workspace:*
       '@snoka/runner': workspace:*
       '@snoka/server': workspace:*
+      '@snoka/utils': workspace:*
       '@types/lodash': ^4.14.191
       commander: ^9.5.0
       consola: ^2.15.3
@@ -49,6 +50,7 @@ importers:
       '@snoka/config': link:../config
       '@snoka/runner': link:../runner
       '@snoka/server': link:../server
+      '@snoka/utils': link:../utils
       commander: 9.5.0
       consola: 2.15.3
       lodash: 4.17.21
@@ -124,9 +126,10 @@ importers:
 
   packages/runner:
     specifiers:
+      '@akryum/rollup-plugin-esbuild': ^1.0.0
       '@akryum/workerpool': 6.0.5-alpha.2
       '@babel/core': ^7.20.12
-      '@snoka/config': workspace:^0.0.0
+      '@snoka/config': workspace:*
       '@snoka/reactive': workspace:*
       '@snoka/utils': workspace:*
       '@types/chalk': ^2.2.0
@@ -140,13 +143,13 @@ importers:
       mock-require: ^3.0.3
       must: ^0.13.4
       rollup: ^3.10.0
-      rollup-plugin-esbuild: ^5.0.0
       shortid: ^2.2.16
       sinon: ^15.0.1
       source-map-support: ^0.5.21
       typescript: ^4.9.4
       unionfs: ^4.4.0
     dependencies:
+      '@akryum/rollup-plugin-esbuild': 1.0.0_esbuild@0.16.17
       '@akryum/workerpool': 6.0.5-alpha.2
       '@babel/core': 7.20.12
       '@snoka/config': link:../config
@@ -161,7 +164,6 @@ importers:
       mock-require: 3.0.3
       must: 0.13.4
       rollup: 3.10.1
-      rollup-plugin-esbuild: 5.0.0_hw2j6smmsnfcrxj5uwrlxbef3m
       shortid: 2.2.16
       sinon: 15.0.1
       source-map-support: 0.5.21
@@ -223,25 +225,19 @@ importers:
     devDependencies:
       '@types/node': 18.11.18
 
-  tests:
-    specifiers:
-      '@snoka/cli': workspace:*
-      '@snoka/config': workspace:*
-      '@snoka/reactive': workspace:*
-      '@snoka/runner': workspace:*
-      '@snoka/server': workspace:*
-      '@snoka/utils': workspace:*
-      nodemon: ^2.0.20
-    dependencies:
-      '@snoka/cli': link:../packages/cli
-      '@snoka/config': link:../packages/config
-      '@snoka/reactive': link:../packages/reactive
-      '@snoka/runner': link:../packages/runner
-      '@snoka/server': link:../packages/server
-      '@snoka/utils': link:../packages/utils
-      nodemon: 2.0.20
-
 packages:
+
+  /@akryum/rollup-plugin-esbuild/1.0.0_esbuild@0.16.17:
+    resolution: {integrity: sha512-FPd483HkHonOStmbxK8enX8zpY+O86QQO+HwXpgR5r4yxHsaH1JNeomUux3bgofPPs9gohPohN6PjTSoPMbtEw==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      esbuild: '>=0.7.0'
+    dependencies:
+      '@rollup/pluginutils': 4.2.1
+      esbuild: 0.16.17
+      joycon: 2.2.5
+      strip-json-comments: 3.1.1
+    dev: false
 
   /@akryum/workerpool/6.0.5-alpha.2:
     resolution: {integrity: sha512-8wZHpTP5ia0WmiT3YxhhaKM5XuydjemFn6NelX+BbqMAAX4cST7KIHTJxkwaW5vbgtDzAVXL2witnrSBMWBnLA==}
@@ -1083,19 +1079,12 @@ packages:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
     dev: false
 
-  /@rollup/pluginutils/5.0.2_rollup@3.10.1:
-    resolution: {integrity: sha512-pTd9rIsP92h+B6wWwFbW8RkZv4hiR/xKsqre4SIuAOaOEQRxi0lqLke9k2/7WegC85GgUs9pjmOjCUi3In4vwA==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      rollup: ^1.20.0||^2.0.0||^3.0.0
-    peerDependenciesMeta:
-      rollup:
-        optional: true
+  /@rollup/pluginutils/4.2.1:
+    resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}
+    engines: {node: '>= 8.0.0'}
     dependencies:
-      '@types/estree': 1.0.0
       estree-walker: 2.0.2
       picomatch: 2.3.1
-      rollup: 3.10.1
     dev: false
 
   /@sentry/core/5.30.0:
@@ -1251,10 +1240,6 @@ packages:
     resolution: {integrity: sha512-fO3gf3DxU2Trcbr75O7obVndW/X5k8rJNZkLXlQWStTHhP71PkRqjwPIEI0yMnJdg9R9OasjU+Bsr+Hr1xy/0w==}
     dependencies:
       '@types/express': 4.17.7
-    dev: false
-
-  /@types/estree/1.0.0:
-    resolution: {integrity: sha512-WulqXMDUTYAXCjZnk6JtIHPigp55cVtDgDrO2gHRwhyJto21+1zbVCtOYB2L1F9w4qCQ0rOGWBnBe0FNTiEJIQ==}
     dev: false
 
   /@types/express-serve-static-core/4.17.17:
@@ -3087,10 +3072,6 @@ packages:
     resolution: {integrity: sha512-wd6JXUmyHmt8T5a2xreUwKcGPq6f1f+WwIJkijUqiGcJz1qqnZgP6XIK+QyIWU5lT7imeNxUll48bziG+TSYcA==}
     dev: false
 
-  /es-module-lexer/1.1.0:
-    resolution: {integrity: sha512-fJg+1tiyEeS8figV+fPcPpm8WqJEflG3yPU0NOm5xMvrNkuiy7HzX/Ljng4Y0hAoiw4/3hQTCFYw+ub8+a2pRA==}
-    dev: false
-
   /es-set-tostringtag/2.0.1:
     resolution: {integrity: sha512-g3OMbtlwY3QewlqAiMLI47KywjWZoEytKr8pf6iTC8uJq5bIAH52Z9pnQ8pVL6whrCto53JZDuUIsifGeLorTg==}
     engines: {node: '>= 0.4'}
@@ -4697,9 +4678,15 @@ packages:
     resolution: {integrity: sha512-QZ9qOMdF+QLHxy1QIpUHUU1D5pS2CG2P69LF6L6CPjPYA/XMOmKV3PZpawHoAjHNyB0swdVTRxdYT4tbBbxqwg==}
     dev: false
 
+  /joycon/2.2.5:
+    resolution: {integrity: sha512-YqvUxoOcVPnCp0VU1/56f+iKSdvIRJYPznH22BdXV3xMk75SFXhWeJkZ8C9XxUWt1b5x2X1SxuFygW1U0FmkEQ==}
+    engines: {node: '>=6'}
+    dev: false
+
   /joycon/3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
+    dev: true
 
   /js-message/1.0.7:
     resolution: {integrity: sha512-efJLHhLjIyKRewNS9EGZ4UpI8NguuL6fKkhRxVuMmrGV2xN/0APGdQYwLFky5w9naebSZ0OwAGp0G6/2Cg90rA==}
@@ -4781,10 +4768,6 @@ packages:
       espree: 9.4.1
       semver: 7.3.8
     dev: true
-
-  /jsonc-parser/3.2.0:
-    resolution: {integrity: sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==}
-    dev: false
 
   /jsonfile/6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
@@ -5798,24 +5781,6 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rollup-plugin-esbuild/5.0.0_hw2j6smmsnfcrxj5uwrlxbef3m:
-    resolution: {integrity: sha512-1cRIOHAPh8WQgdQQyyvFdeOdxuiyk+zB5zJ5+YOwrZP4cJ0MT3Fs48pQxrZeyZHcn+klFherytILVfE4aYrneg==}
-    engines: {node: '>=14.18.0', npm: '>=8.0.0'}
-    peerDependencies:
-      esbuild: '>=0.10.1'
-      rollup: ^1.20.0 || ^2.0.0 || ^3.0.0
-    dependencies:
-      '@rollup/pluginutils': 5.0.2_rollup@3.10.1
-      debug: 4.3.4
-      es-module-lexer: 1.1.0
-      esbuild: 0.16.17
-      joycon: 3.1.1
-      jsonc-parser: 3.2.0
-      rollup: 3.10.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /rollup/2.79.1:
     resolution: {integrity: sha512-uKxbd0IhMZOhjAiD5oAFp7BqvkA4Dv47qpOCtaNvng4HBwdbWtdOh8f5nZNuk2rp51PMGk3bzfWu5oayNEuYnw==}
     engines: {node: '>=10.0.0'}
@@ -6110,7 +6075,6 @@ packages:
   /strip-json-comments/3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
-    dev: true
 
   /strong-type/0.1.6:
     resolution: {integrity: sha512-eJe5caH6Pi5oMMeQtIoBPpvNu/s4jiyb63u5tkHNnQXomK+puyQ5i+Z5iTLBr/xUz/pIcps0NSfzzFI34+gAXg==}

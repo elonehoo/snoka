@@ -4,6 +4,7 @@ import { setupConfigLoader, mergeConfig, SnokaConfig } from '@snoka/config'
 import { runAllTests } from '@snoka/runner'
 import { pick } from 'lodash'
 import consola from 'consola'
+import { ensureESBuildService } from '@snoka/utils'
 
 const program = new Command()
 program.version(require('../package.json').version)
@@ -14,21 +15,42 @@ program.command('run')
   .option('-i, --ignore <globs...>', 'Globs ignore when looking for test files. Example: `snoka run -i "node_modules" "dist/**/*.ts"`')
   .action(async (options) => {
     try {
+      await ensureESBuildService()
       const configLoader = await setupConfigLoader()
-      const config = await configLoader.loadConfig()
+      const config = await configLoader.loadConfig(false)
       await configLoader.destroy()
       const finalConfig = mergeConfig(config, (pick<any>(options, [
         'match',
         'ignore',
       ]) as SnokaConfig))
 
-      const { stats: { errorTestCount } } = await runAllTests(finalConfig)
+      const { stats: { errorSuiteCount } } = await runAllTests(finalConfig)
 
-      if (errorTestCount) {
+      if (errorSuiteCount) {
         const e = new Error('Some tests failed')
         e.stack = e.message
         throw e
       }
+    } catch (e) {
+      consola.error(e)
+      process.exit(1)
+    }
+  })
+
+program.command('open')
+  .description('open a web interface to run and monitor tests')
+  .action(async () => {
+    try {
+      await ensureESBuildService()
+      const {
+        http,
+      } = await createServer()
+      const port = process.env.PORT || 4000
+      http.listen(port, () => {
+        const url = `http://localhost:${port}`
+        consola.success(`🚀 Server ready at ${url}`)
+        open(url)
+      })
     } catch (e) {
       consola.error(e)
       process.exit(1)

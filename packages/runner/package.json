@@ -12,6 +12,7 @@
     "build:fix": "esno scripts/postbuild.ts"
   },
   "dependencies": {
+    "@akryum/rollup-plugin-esbuild": "^1.0.0",
     "@akryum/workerpool": "6.0.5-alpha.2",
     "@babel/core": "^7.20.12",
     "@snoka/config": "workspace:*",
@@ -26,7 +27,6 @@
     "mock-require": "^3.0.3",
     "must": "^0.13.4",
     "rollup": "^3.10.0",
-    "rollup-plugin-esbuild": "^5.0.0",
     "shortid": "^2.2.16",
     "sinon": "^15.0.1",
     "source-map-support": "^0.5.21",

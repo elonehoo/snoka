@@ -29,6 +29,7 @@
     "@snoka/config": "workspace:*",
     "@snoka/runner": "workspace:*",
     "@snoka/server": "workspace:*",
+    "@snoka/utils": "workspace:*",
     "commander": "^9.5.0",
     "consola": "^2.15.3",
     "lodash": "^4.17.21"
