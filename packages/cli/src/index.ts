@@ -2,9 +2,11 @@
 import { Command } from 'commander'
 import { setupConfigLoader, mergeConfig, SnokaConfig } from '@snoka/config'
 import { runAllTests } from '@snoka/runner'
+import { createServer } from '@snoka/server'
 import { pick } from 'lodash'
 import consola from 'consola'
 import { ensureESBuildService } from '@snoka/utils'
+import portfinder from 'portfinder'
 
 const program = new Command()
 program.version(require('../package.json').version)
@@ -39,13 +41,16 @@ program.command('run')
 
 program.command('open')
   .description('open a web interface to run and monitor tests')
-  .action(async () => {
+  .option('-p, --port <port>', 'Listening port of the server')
+  .action(async (options) => {
     try {
       await ensureESBuildService()
       const {
         http,
       } = await createServer()
-      const port = process.env.PORT || 4000
+      const port = options.port ?? process.env.PORT ?? await portfinder.getPortPromise({
+        startPort: 5000,
+      })
       http.listen(port, () => {
         const url = `http://localhost:${port}`
         consola.success(`🚀 Server ready at ${url}`)
