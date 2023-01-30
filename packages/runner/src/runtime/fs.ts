@@ -408,7 +408,6 @@ export function createMockedFileSystem(): any {
       return memfs.open(path, ...args)
     }
     else {
-      // @ts-expect-error
       return origOpen(path, ...args)
     }
   }

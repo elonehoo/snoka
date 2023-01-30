@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import type { NexusGenFieldTypes } from '@snoka/server/types'
+import { NexusGenFieldTypes } from '@snoka/server/types'
 import { useQuery, useSubscription } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import TestViewPlaceholder from '../test/TestViewPlaceholder.vue'
 import SnapshotView from './SnapshotView.vue'
+import TestViewPlaceholder from '../test/TestViewPlaceholder.vue'
 
 const runFragment = gql`fragment runOneSnapshot on Run {
   id
@@ -76,8 +76,8 @@ const { result, refetch } = useQuery<{
 `, () => ({
   ...route.params.runId !== 'last-run'
     ? {
-        runId: route.params.runId,
-      }
+      runId: route.params.runId,
+    }
     : {},
   snapshotId: route.query.snapshotId,
 }), () => ({

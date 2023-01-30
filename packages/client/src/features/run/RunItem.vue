@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PropType } from 'vue'
+import { PropType } from 'vue'
 import type { NexusGenFieldTypes } from '@snoka/server/types'
 import StatusIcon from '../StatusIcon.vue'
 import Duration from '../Duration.vue'

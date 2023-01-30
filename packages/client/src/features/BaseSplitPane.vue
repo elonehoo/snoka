@@ -1,12 +1,12 @@
 <script lang="ts">
-import { computed, defineComponent, ref, watch } from 'vue'
+import { defineComponent, ref, computed, watch } from 'vue'
 
 export default defineComponent({
   props: {
     orientation: {
       type: String,
       default: 'landscape',
-      validator: (value: any) => ['landscape', 'portrait'].includes(value),
+      validator: value => ['landscape', 'portrait'].includes(value),
     },
 
     defaultSplit: {
@@ -27,7 +27,7 @@ export default defineComponent({
     draggerOffset: {
       type: String,
       default: 'center',
-      validator: (value: any) => ['before', 'center', 'after'].includes(value),
+      validator: value => ['before', 'center', 'after'].includes(value),
     },
 
     saveId: {
@@ -41,7 +41,7 @@ export default defineComponent({
     },
   },
 
-  setup(props) {
+  setup (props) {
     const split = ref(props.defaultSplit)
 
     if (props.saveId) {
@@ -52,65 +52,65 @@ export default defineComponent({
         let parsedValue
         try {
           parsedValue = JSON.parse(savedValue)
-        }
-        catch (e) {
+        } catch (e) {
           console.error(e)
         }
 
-        if (typeof parsedValue === 'number')
+        if (typeof parsedValue === 'number') {
           split.value = parsedValue
+        }
       }
 
-      watch(split, (value) => {
+      watch(split, value => {
         localStorage.setItem(storageKey, JSON.stringify(value))
       })
     }
 
     const boundSplit = computed(() => {
-      if (split.value < props.min)
+      if (split.value < props.min) {
         return props.min
-      else if (split.value > props.max)
+      } else if (split.value > props.max) {
         return props.max
-      else
+      } else {
         return split.value
+      }
     })
 
     const leftStyle = computed(() => (props.disabled
       ? {
-          flex: 'auto 1 1',
-        }
+        flex: 'auto 1 1',
+      }
       : {
-          [props.orientation === 'landscape' ? 'width' : 'height']: `${boundSplit.value}%`,
-        }))
+        [props.orientation === 'landscape' ? 'width' : 'height']: `${boundSplit.value}%`,
+      }))
 
     const rightStyle = computed(() => (props.disabled
       ? {
-          display: 'none',
-        }
+        display: 'none',
+      }
       : {
-          [props.orientation === 'landscape' ? 'width' : 'height']: `${100 - boundSplit.value}%`,
-        }))
+        [props.orientation === 'landscape' ? 'width' : 'height']: `${100 - boundSplit.value}%`,
+      }))
 
     const dragging = ref(false)
     let startPosition = 0
     let startSplit = 0
     const el = ref(null)
 
-    function dragStart(e: any) {
+    function dragStart (e) {
       dragging.value = true
       startPosition = props.orientation === 'landscape' ? e.pageX : e.pageY
       startSplit = boundSplit.value
     }
 
-    function dragMove(e: any) {
+    function dragMove (e) {
       if (dragging.value) {
         let position
         let totalSize
         if (props.orientation === 'landscape') {
           position = e.pageX
           totalSize = el.value.offsetWidth
-        }
-        else {
+        } else {
           position = e.pageY
           totalSize = el.value.offsetHeight
         }
@@ -119,7 +119,7 @@ export default defineComponent({
       }
     }
 
-    function dragEnd() {
+    function dragEnd () {
       dragging.value = false
     }
 
@@ -144,7 +144,7 @@ export default defineComponent({
       'flex-col meow': orientation === 'portrait',
       'cursor-ew-resize': dragging && orientation === 'landscape',
       'cursor-ns-resize': dragging && orientation === 'portrait',
-      [orientation]: true,
+      [orientation]: true
     }"
     @mousemove="dragMove"
     @mouseup="dragEnd"
@@ -154,7 +154,7 @@ export default defineComponent({
       class="relative top-0 left-0"
       :class="{
         'pointer-events-none': dragging,
-        'border-r border-gray-100 dark:border-gray-800': orientation === 'landscape',
+        'border-r border-gray-100 dark:border-gray-800': orientation === 'landscape'
       }"
       :style="leftStyle"
     >
@@ -166,7 +166,7 @@ export default defineComponent({
         :class="{
           'top-0 bottom-0 cursor-ew-resize': orientation === 'landscape',
           'left-0 right-0 cursor-ns-resize': orientation === 'portrait',
-          [`dragger-offset-${draggerOffset}`]: true,
+          [`dragger-offset-${draggerOffset}`]: true
         }"
         @mousedown.prevent="dragStart"
       />
@@ -175,7 +175,7 @@ export default defineComponent({
       class="relative bottom-0 right-0"
       :class="{
         'pointer-events-none': dragging,
-        'border-t border-gray-100 dark:border-gray-800': orientation === 'portrait',
+        'border-t border-gray-100 dark:border-gray-800': orientation === 'portrait'
       }"
       :style="rightStyle"
     >

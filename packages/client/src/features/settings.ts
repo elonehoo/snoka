@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@vue/apollo-composable'
-import type { NexusGenFieldTypes, NexusGenInputs } from '@snoka/server/types'
+import type { NexusGenInputs, NexusGenFieldTypes } from '@snoka/server/types'
 import gql from 'graphql-tag'
 import { computed } from 'vue'
 
@@ -13,7 +13,7 @@ fragment settings on Settings {
 
 type Settings = Pick<NexusGenFieldTypes['Settings'], 'id' | 'watch' | 'darkMode'>
 
-export function useSettings() {
+export function useSettings () {
   const { result, loading } = useQuery<{
     settings: Settings
   }>(gql`
@@ -35,7 +35,7 @@ export function useSettings() {
     ${settingsFragment}
   `)
 
-  async function updateSettings(input: Partial<NexusGenInputs['UpdateSettingsInput']>) {
+  async function updateSettings (input: Partial<NexusGenInputs['UpdateSettingsInput']>) {
     return mutate({
       input: {
         ...settings.value,

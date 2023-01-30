@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import type { PropType } from 'vue'
-import { computed } from 'vue'
+import { computed, PropType } from 'vue'
 import { formatDuration } from '@snoka/utils/dist/format'
 
 const props = defineProps({

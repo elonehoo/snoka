@@ -1,3 +1,4 @@
+
 <script lang="ts" setup>
 import { useQuery } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
@@ -8,6 +9,9 @@ import { CameraIcon } from '@zhuowenli/vue-feather-icons'
 import BaseSplitPane from '../BaseSplitPane.vue'
 import SnapshotItem from '../snapshot/SnapshotItem.vue'
 import SnapshotView from '../snapshot/SnapshotView.vue'
+
+const route = useRoute()
+const router = useRouter()
 
 const props = defineProps({
   test: {
@@ -20,8 +24,6 @@ const props = defineProps({
     required: true,
   },
 })
-const route = useRoute()
-const router = useRouter()
 
 const { result, refetch } = useQuery(() => gql`
   query testLogs ($runId: ID!, $suiteId: ID!, $testId: ID!) {
@@ -61,12 +63,12 @@ watch(() => props.test.status, () => {
 
 const selectedSnapshot = computed(() => snapshots.value.find((s: any) => s.id === route.query.snapshotId))
 
-function selectPrevious() {
+function selectPrevious () {
   let index = snapshots.value.indexOf(selectedSnapshot.value)
   index--
-  if (index < 0)
+  if (index < 0) {
     index = snapshots.value.length - 1
-
+  }
   router.push({
     query: {
       ...route.query,
@@ -75,12 +77,12 @@ function selectPrevious() {
   })
 }
 
-function selectNext() {
+function selectNext () {
   let index = snapshots.value.indexOf(selectedSnapshot.value)
   index++
-  if (index > snapshots.value.length - 1)
+  if (index > snapshots.value.length - 1) {
     index = 0
-
+  }
   router.push({
     query: {
       ...route.query,
@@ -116,6 +118,7 @@ watch(() => snapshots.value.length, (length) => {
     </div>
     <div>
       Text snapshots will appear here. <a
+        href="https://snoka.dev/guide/writing-tests.html#text-snapshots"
         target="_blank"
         class="text-primary-500"
       >Learn more</a>

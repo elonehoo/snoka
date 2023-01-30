@@ -4,9 +4,9 @@ import gql from 'graphql-tag'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import SuitesView from '../suite/SuitesView.vue'
+import TestFileToolbar from './TestFileToolbar.vue'
 import { testItemFragment } from '../test/TestItem.vue'
 import { testSuiteItemFragment } from '../suite/SuiteItem.vue'
-import TestFileToolbar from './TestFileToolbar.vue'
 
 const route = useRoute()
 
@@ -72,8 +72,8 @@ const { result, subscribeToMore, onResult } = useQuery(() => route.params.runId 
   fileSlug: route.query.fileSlug,
   ...route.params.runId !== 'last-run'
     ? {
-        runId: route.params.runId,
-      }
+      runId: route.params.runId,
+    }
     : {},
 }), {
   fetchPolicy: 'cache-and-network',

@@ -1,19 +1,18 @@
 <script lang="ts" setup>
 import { watch } from 'vue'
-import { connected } from '../apollo'
 import { useSettings } from './settings'
 import DisconnectedToast from './DisconnectedToast.vue'
+import { connected } from '../apollo'
 
 const { settings } = useSettings()
 
-watch(settings, (value) => {
-  if (!value)
-    return
-  if (value.darkMode)
+watch(settings, value => {
+  if (!value) return
+  if (value.darkMode) {
     document.documentElement.classList.add('dark')
-  else
+  } else {
     document.documentElement.classList.remove('dark')
-
+  }
   document.documentElement.classList.remove('loading')
 }, { deep: true, immediate: true })
 </script>
@@ -21,7 +20,7 @@ watch(settings, (value) => {
 <template>
   <div
     :class="{
-      grayscale: !connected,
+      'grayscale': !connected
     }"
   >
     <router-view />

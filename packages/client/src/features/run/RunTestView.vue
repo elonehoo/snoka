@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import BaseSplitPane from '../BaseSplitPane.vue'
+import RunSummaryBar from './RunSummaryBar.vue'
 import TestFileAllView from '../test-file/TestFileAllView.vue'
 import TestFileOneView from '../test-file/TestFileOneView.vue'
-import RunSummaryBar from './RunSummaryBar.vue'
 </script>
 
 <template>

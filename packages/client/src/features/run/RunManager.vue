@@ -1,15 +1,15 @@
 <script lang="ts" setup>
 import {
   ActivityIcon,
-  MoonIcon,
   MoreVerticalIcon,
   SunIcon,
+  MoonIcon,
 } from '@zhuowenli/vue-feather-icons'
 import { useQuery } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import type { NexusGenFieldTypes } from '@snoka/server/types'
+import { NexusGenFieldTypes } from '@snoka/server/types'
 import { useSettings } from '../settings'
 import BaseButton from '../BaseButton.vue'
 import BaseSwitch from '../BaseSwitch.vue'
@@ -56,8 +56,8 @@ const { result, subscribeToMore } = useQuery<{
   ${runDetailsFragment}
 `, () => route.params.runId !== 'last-run'
   ? {
-      id: route.params.runId,
-    }
+    id: route.params.runId,
+  }
   : {})
 const currentRun = computed(() => result.value?.run)
 
@@ -94,8 +94,7 @@ subscribeToMore<undefined, {
   updateQuery: (previousResult, { subscriptionData: { data } }) => {
     if (route.params.runId && route.params.runId !== 'last-run') {
       return previousResult
-    }
-    else {
+    } else {
       return {
         run: data.runAdded,
       }
@@ -108,10 +107,10 @@ subscribeToMore<undefined, {
 const { settings, updateSettings } = useSettings()
 
 const watchEnabled = computed<boolean>({
-  get() {
+  get () {
     return !!settings.value?.watch
   },
-  set(value) {
+  set (value) {
     updateSettings({
       watch: value,
     })
@@ -119,10 +118,10 @@ const watchEnabled = computed<boolean>({
 })
 
 const darkMode = computed<boolean>({
-  get() {
+  get () {
     return !!settings.value?.darkMode
   },
-  set(value) {
+  set (value) {
     updateSettings({
       darkMode: value,
     })

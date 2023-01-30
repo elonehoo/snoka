@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import type { PropType } from 'vue'
-import { computed, onUnmounted, ref, watchEffect } from 'vue'
+import { computed, onUnmounted, PropType, ref, watchEffect } from 'vue'
 
 const props = defineProps({
   date: {
@@ -21,7 +20,7 @@ const rtf = new Intl.RelativeTimeFormat(undefined, {
 
 const units: ([number, Intl.RelativeTimeFormatUnit])[] = [[60, 'minute'], [60, 'hour'], [24, 'day']]
 
-function update() {
+function update () {
   let diff = (parsedDate.value.getTime() - Date.now()) / 1000
   let unit: Intl.RelativeTimeFormatUnit = 'second'
   let newInterval = 1000

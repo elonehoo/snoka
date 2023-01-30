@@ -1,14 +1,4 @@
 <script lang="ts">
-</script>
-
-<script lang="ts" setup>
-import { useMutation } from '@vue/apollo-composable'
-import gql from 'graphql-tag'
-import { computed, ref } from 'vue'
-import { ChevronRightIcon } from '@zhuowenli/vue-feather-icons'
-import BaseButton from '../BaseButton.vue'
-import StatusIcon from '../StatusIcon.vue'
-import DiffEditor from '../editor/DiffEditor.vue'
 export const errorFragment = gql`
 fragment testResultError on TestError {
   message
@@ -20,6 +10,16 @@ fragment testResultError on TestError {
   actual
 }
 `
+</script>
+
+<script lang="ts" setup>
+import { useMutation } from '@vue/apollo-composable'
+import gql from 'graphql-tag'
+import { computed, ref } from 'vue'
+import { ChevronRightIcon } from '@zhuowenli/vue-feather-icons'
+import BaseButton from '../BaseButton.vue'
+import StatusIcon from '../StatusIcon.vue'
+import DiffEditor from '../editor/DiffEditor.vue'
 
 const props = defineProps({
   test: {
@@ -48,10 +48,9 @@ mutation openFileInEditor ($path: String!, $line: Int!, $col: Int!) {
 }
 `)
 
-function onStackClick(event: MouseEvent) {
+function onStackClick (event: MouseEvent) {
   const link = event.target as HTMLLinkElement
-  if (!link.attributes.getNamedItem('data-file')?.value)
-    return
+  if (!link.attributes.getNamedItem('data-file')?.value) { return }
 
   openFileInEditor({
     path: link.attributes.getNamedItem('data-file')?.value,

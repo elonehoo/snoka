@@ -1,11 +1,5 @@
 <script lang="ts">
 import gql from 'graphql-tag'
-</script>
-
-<script lang="ts" setup>
-import { useMutation } from '@vue/apollo-composable'
-import StatusIcon from '../StatusIcon.vue'
-import Duration from '../Duration.vue'
 
 export const testItemFragment = gql`
 fragment testItem on Test {
@@ -22,6 +16,12 @@ fragment testItem on Test {
   }
 }
 `
+</script>
+
+<script lang="ts" setup>
+import StatusIcon from '../StatusIcon.vue'
+import Duration from '../Duration.vue'
+import { useMutation } from '@vue/apollo-composable'
 
 const props = defineProps({
   test: {

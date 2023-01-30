@@ -5,13 +5,13 @@ const mergedArrays: string[] = [
   'buildInclude',
 ]
 
-export function mergeConfig<T extends (Record<string, any> = Record<string, any>>(a: T, b: T): T {
+export function mergeConfig<T extends (Record<string, any>) = Record<string, any>>(a: T, b: T): T {
   const merged: T = { ...a }
   for (const key in b) {
     const value = b[key]
-    if (value == null) 
+    if (value == null)
       continue
-    
+
 
     const existing = merged[key]
     if (Array.isArray(existing) && Array.isArray(value) && mergedArrays.includes(key)) {
@@ -37,9 +37,9 @@ export function toSerializableConfig(config: SnokaConfig): SerializableSnokaConf
 
 export function toProgramConfig(config: SnokaConfig): ProgramSnokaConfig {
   const result = { ...config }
-  if (typeof result.runtimeEnv !== 'string') 
+  if (typeof result.runtimeEnv !== 'string')
     delete result.runtimeEnv
-  
+
   delete result.runtimeAvailableEnvs
   delete result.buildInclude
   delete result.buildExclude

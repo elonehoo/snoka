@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ArrowLeftIcon, FileIcon } from '@zhuowenli/vue-feather-icons'
 import BaseButton from '../BaseButton.vue'
 import StatusIcon from '../StatusIcon.vue'
 import Duration from '../Duration.vue'
+import { ArrowLeftIcon, FileIcon } from '@zhuowenli/vue-feather-icons'
 
 const props = defineProps({
   file: {

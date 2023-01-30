@@ -101,7 +101,7 @@ const kinds = [
           class="h-full"
           :class="kind.css"
           :style="{
-            width: `${runStats[kind.field] / Math.max(runStats.testCount, 1) * 100}%`,
+            width: (runStats[kind.field] / Math.max(runStats.testCount, 1) * 100) + '%',
           }"
         />
       </div>
@@ -113,7 +113,7 @@ const kinds = [
           placement="bottom"
           class="h-full"
           :style="{
-            width: `${runStats[kind.field] / Math.max(runStats.testCount, 1) * 100}%`,
+            width: (runStats[kind.field] / Math.max(runStats.testCount, 1) * 100) + '%',
           }"
         >
           <div class="w-full h-full" />
