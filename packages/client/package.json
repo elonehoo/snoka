@@ -4,7 +4,12 @@
   "description": "",
   "author": "Elone Hoo <hi@elonehoo.me>",
   "license": "MIT",
-  "keywords": [],
+  "keywords": [
+    "vite",
+    "node",
+    "test",
+    "client"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build --emptyOutDir",

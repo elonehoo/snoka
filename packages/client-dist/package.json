@@ -1,10 +1,15 @@
 {
   "name": "@snoka/client-dist",
   "version": "0.0.0",
-  "description": "",
+  "description": "Frontend production build for Snoka, the testing framework for curious minds",
   "author": "Elone Hoo <hi@elonehoo.me>",
   "license": "MIT",
-  "keywords": [],
+  "keywords": [
+    "vite",
+    "node",
+    "test",
+    "client-dist"
+  ],
   "main": "index.js",
   "scripts": {
   }

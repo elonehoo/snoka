@@ -2,10 +2,15 @@
   "name": "@snoka/runner",
   "type": "module",
   "version": "0.0.0",
-  "description": "",
-  "author": "",
+  "description": "Test runner for Snoka, the testing framework for curious minds",
+  "author": "Elone Hoo <hi@elonehoo.me>",
   "license": "MIT",
-  "keywords": [],
+  "keywords": [
+    "vite",
+    "node",
+    "test",
+    "runner"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
