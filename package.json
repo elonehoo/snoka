@@ -7,11 +7,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "pnpm -C packages/client run dev",
-    "dev:server": "pnpm -C demo run dev:server",
-    "dev:run": "pnpm -C demo run dev:run",
     "build": "pnpm run --filter \"./packages/**\" -r build",
     "watch": "pnpm run build && pnpm run --parallel --filter \"./packages/**\" -r watch",
-    "test": "pnpm run --parallel --filter \"./packages/**\" -r test",
+    "test": "pnpm -C demo run test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
