@@ -129,7 +129,8 @@ export async function runTestFile(options: RunTestFileOptions) {
       files,
       globals: await getGlobals(ctx, collector),
       root: config.targetDirectory,
-      // moduleCache,
+      //@ts-ignore
+      moduleCache,
       fetchModule: toMainThread().fetchModule,
       resolveId: toMainThread().resolveId,
     })
