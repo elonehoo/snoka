@@ -2,7 +2,7 @@ import { createRetry } from './test-flow'
 
 const retry = createRetry({ filename: 'foo.ts' })
 
-describe('peeky.retry()', () => {
+describe('snoka.retry()', () => {
   test('must not retry when no error', async () => {
     const spy = sinon.fake()
     expect(spy.callCount).toBe(0)

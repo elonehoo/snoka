@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/fonts/FiraCode-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  @apply text-sm;
+
+  &.loading {
+    @apply text-gray-300 bg-gray-600;
+  }
+
+  &.dark {
+    @apply text-white bg-dark;
+
+    *::-webkit-scrollbar-track {
+      @apply bg-gray-900;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      @apply bg-gray-700;
+    }
+  }
+}
+
+/* Poppers */
+
+html .v-popper--theme-dropdown {
+  .v-popper__inner {
+    @apply p-0;
+  }
+}
+
+html.dark {
+  .v-popper--theme-dropdown {
+    .v-popper__inner {
+      @apply text-white bg-dark border-gray-800;
+    }
+
+    .v-popper__arrow-inner {
+      @apply border-dark;
+    }
+
+    .v-popper__arrow-outer {
+      @apply border-gray-800;
+    }
+  }
+}
+
+.v-popper--theme-dropdown.v-popper__popper--show-from .v-popper__wrapper {
+  transform: scale(.9);
+}
+
+.v-popper--theme-dropdown.v-popper__popper--show-to .v-popper__wrapper {
+  transform: none;
+  transition: transform .15s;
+}
+
+
+/* Disable touch blue rectangle */
+[type="button"],
+[type="submit"],
+.button-like,
+a {
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*::-webkit-scrollbar-track {
+  @apply bg-gray-50;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  @apply bg-gray-200;
+  border-radius: 4px;
+}
+
+.active-colors {
+  @apply bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300;
+
+  .path {
+    @apply opacity-100;
+  }
+}
+
+@tailwind utilities;

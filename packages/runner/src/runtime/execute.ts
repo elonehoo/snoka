@@ -15,19 +15,19 @@ export async function execute (options: ExecuteFileOptions) {
       const fsPath = context.__filename
       const request = context.__vite_ssr_import__
 
-      const peekyGlobals = createSnokaGlobal({
+      const snokaGlobals = createSnokaGlobal({
         filename: fsPath,
       })
 
-      // @peeky/test package stub
-      const peekyTestStub = () => ({
-        ...peekyGlobals,
+      // @snoka/test package stub
+      const snokaTestStub = () => ({
+        ...snokaGlobals,
         ...options.globals,
       })
 
       context.__vite_ssr_import__ = async (dep: string) => {
-        if (dep.includes('@peeky/test') || dep.includes('peeky-test')) {
-          return peekyTestStub()
+        if (dep.includes('@snoka/test') || dep.includes('test')) {
+          return snokaTestStub()
         }
 
         const resolvedId = await options.resolveId(dep, fsPath)
@@ -40,7 +40,7 @@ export async function execute (options: ExecuteFileOptions) {
 
       Object.assign(context, {
         ...options.globals,
-        peeky: peekyGlobals,
+        snoka: snokaGlobals,
       })
 
       return context
