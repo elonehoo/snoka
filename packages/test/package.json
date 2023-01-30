@@ -1,8 +1,8 @@
 {
-  "name": "snoka",
+  "name": "@snoka/test",
   "type": "module",
   "version": "0.0.0",
-  "description": "A fast and fun test runner for Vite & Node.",
+  "description": "A fast and fun test runner for Vite & Node",
   "author": "Elone Hoo <hi@elonehoo.me>",
   "license": "MIT",
   "keywords": [
