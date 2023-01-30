@@ -8,34 +8,46 @@
   "keywords": [],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
-    }
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": "./*"
   },
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "snoka": "./dist/index.js"
+    "snoka": "./bin.mjs"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "build": "tsup",
-    "build:fix": "esno scripts/postbuild.ts && chmod +x ./dist/index.js"
+    "build": "rimraf dist && tsc -d && chmod +x ./dist/bin.js",
+    "watch": "tsc -d -w --sourceMap"
   },
   "dependencies": {
+    "@antfu/install-pkg": "^0.1.1",
     "@snoka/config": "workspace:*",
     "@snoka/runner": "workspace:*",
     "@snoka/server": "workspace:*",
-    "@snoka/utils": "workspace:*",
-    "commander": "^9.5.0",
     "consola": "^2.15.3",
+    "local-pkg": "^0.4.3",
     "lodash": "^4.17.21",
-    "portfinder": "^1.0.32"
+    "open": "^8.4.0",
+    "pathe": "^1.1.0",
+    "portfinder": "^1.0.32",
+    "sade": "^1.8.1",
+    "typescript": "^4.9.4"
+  },
+  "peerDependencies": {
+    "@snoka/server": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@snoka/server": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.191"
+    "@types/lodash": "^4.14.191",
+    "@types/node": "14.14.21",
+    "@types/sade": "^1.7.4"
   }
 }

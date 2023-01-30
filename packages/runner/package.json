@@ -5,36 +5,54 @@
   "author": "",
   "license": "MIT",
   "keywords": [],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": "./*"
+  },
   "main": "./dist/index.js",
-  "types": "./types.d.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsup",
-    "build:fix": "esno scripts/postbuild.ts"
+    "build": "rimraf dist && tsc -d",
+    "watch": "tsc -d -w --sourceMap",
+    "test": "../cli/bin.mjs run"
   },
   "dependencies": {
-    "@akryum/rollup-plugin-esbuild": "^1.0.0",
-    "@akryum/workerpool": "6.0.5-alpha.2",
-    "@babel/core": "^7.20.12",
     "@snoka/config": "workspace:*",
-    "@snoka/reactive": "workspace:*",
     "@snoka/utils": "workspace:*",
-    "@types/chalk": "^2.2.0",
-    "chalk": "4.1.2",
+    "@types/sinon": "^10.0.13",
+    "c8": "^7.12.0",
+    "chalk": "^5.2.0",
+    "chokidar": "^3.5.3",
     "consola": "^2.15.3",
-    "esbuild": "^0.16.17",
+    "diffable-html": "^5.0.0",
+    "expect": "^29.4.1",
+    "fast-glob": "^3.2.12",
+    "fs-extra": "^11.1.0",
     "fs-monkey": "^1.0.3",
+    "happy-dom": "^8.2.0",
+    "jest-diff": "^29.4.1",
+    "lodash": "^4.17.21",
     "memfs": "^3.4.13",
-    "mock-require": "^3.0.3",
-    "must": "^0.13.4",
-    "rollup": "^3.10.0",
-    "shortid": "^2.2.16",
+    "mlly": "^1.1.0",
+    "nanoid": "^4.0.0",
+    "pathe": "^1.1.0",
+    "pragma": "^1.0.0",
+    "pretty-format": "^29.4.1",
     "sinon": "^15.0.1",
+    "slugify": "^1.6.5",
     "source-map-support": "^0.5.21",
+    "tinypool": "^0.3.1",
     "typescript": "^4.9.4",
-    "unionfs": "^4.4.0"
+    "vite": "^4.0.4",
+    "vite-node": "^0.28.3"
   },
   "devDependencies": {
-    "@types/shortid": "^0.0.29",
-    "@types/sinon": "^10.0.13"
+    "@types/fs-extra": "^11.0.1",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^14.14.21"
   }
 }

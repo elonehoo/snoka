@@ -1,53 +1,91 @@
-import { createReactiveFileSystem } from '@snoka/reactive'
-import consola from 'consola'
-import chalk from 'chalk'
-import { setupRunner } from './runner'
-import { getStats } from './stats'
+import { performance } from 'perf_hooks'
+import { ProgramSnokaConfig } from '@snoka/config'
+import glob from 'fast-glob'
+import { setupRunner } from './runner.js'
+import { getStats } from './stats.js'
+import { createConsoleFancyReporter } from './reporters/console-fancy.js'
+import { createRawReporter } from './reporters/raw.js'
+import { reportCoverage } from './coverage.js'
 
-export interface RunAllTestsOptions {
-  targetDirectory: string
-  match?: string | string[]
-  ignored?: string | string[]
+export interface RunAllOptions {
+  quickTestFilter?: string
+  updateSnapshots?: boolean
 }
 
-export const defaultRunTestsOptions: Partial<RunAllTestsOptions> = {
-  match: '**/*.(spec|test).(ts|js)',
-  ignored: ['node_modules'],
-}
+export async function runAllTests (config: ProgramSnokaConfig, options: RunAllOptions = {}) {
+  const reporters = config.reporters
+    ? config.reporters.map(id => {
+      if (id === 'console-fancy') {
+        return createConsoleFancyReporter()
+      } else if (id === 'console-json') {
+        return createRawReporter(data => {
+          console.log(JSON.stringify(data))
+        })
+      }
+      return null
+    }).filter(Boolean)
+    : [
+      createConsoleFancyReporter(),
+    ]
 
-export async function runAllTests(options: RunAllTestsOptions) {
-  options = Object.assign({}, defaultRunTestsOptions, options)
-
-  const fsTime = Date.now()
-  const testFiles = await createReactiveFileSystem({
-    baseDir: options.targetDirectory,
-    glob: options.match,
-    ignored: options.ignored,
+  let fileList = await glob(config.match, {
+    cwd: config.targetDirectory,
+    ignore: Array.isArray(config.ignored) ? config.ignored : [config.ignored],
   })
-  consola.info(`FS initialized in ${Date.now() - fsTime}ms`)
 
   const runner = await setupRunner({
-    targetDirectory: options.targetDirectory,
-    testFiles,
+    config,
+    reporters,
   })
 
-  const fileList = runner.testFiles.list()
+  if (options.quickTestFilter) {
+    const reg = new RegExp(options.quickTestFilter, 'i')
+    fileList = fileList.filter(f => reg.test(f))
+  }
 
-  consola.info(`Found ${fileList.length} test files.`)
-
-  const time = Date.now()
-  const result = await Promise.all(fileList.map(f => runner.runTestFile(f)))
-
-  consola.info(`Ran ${fileList.length} tests files (${Date.now() - time}ms, using ${runner.pool.stats().totalWorkers} parallel workers)`)
+  const time = performance.now()
+  const result = await Promise.all(fileList.map(f => runner.runTestFile(f, [], options.updateSnapshots)))
+  const endTime = performance.now()
 
   const stats = getStats(result)
   const {
+    suites,
     suiteCount,
     errorSuiteCount,
     testCount,
     errorTestCount,
+    snapshotCount,
+    failedSnapshots,
+    newSnapshots,
   } = stats
-  consola.log(chalk[errorTestCount ? 'red' : 'green'](`Suites : ${suiteCount - errorSuiteCount} / ${suiteCount}\nTests  : ${testCount - errorTestCount} / ${testCount}`))
+
+  // Error summary
+  if (errorTestCount) {
+    reporters.forEach(r => r.errorSummary?.({ suites, errorTestCount, testCount }))
+  }
+  if (failedSnapshots.length) {
+    reporters.forEach(r => r.snapshotSummary?.({ snapshotCount, failedSnapshots }))
+  }
+
+  // Coverage
+  if (config.collectCoverage) {
+    await reportCoverage(config.coverageOptions)
+  }
+
+  // Summary
+  const duration = endTime - time
+  reporters.forEach(r => r.summary?.({
+    fileCount: fileList.length,
+    duration,
+    suiteCount,
+    errorSuiteCount,
+    testCount,
+    errorTestCount,
+    snapshotCount,
+    failedSnapshotCount: options.updateSnapshots ? 0 : failedSnapshots.length,
+    updatedSnapshotCount: options.updateSnapshots ? failedSnapshots.length : 0,
+    newSnapshotCount: newSnapshots.length,
+  }))
 
   await runner.close()
 
