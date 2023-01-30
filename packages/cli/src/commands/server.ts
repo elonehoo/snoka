@@ -3,12 +3,12 @@ import openInBrowser from 'open'
 import portfinder from 'portfinder'
 import { isPackageExists } from 'local-pkg'
 
-export async function server (options) {
+export async function server(options) {
   try {
     if (!isPackageExists('@snoka/server')) {
-      consola.info(`Installing @snoka/server...`)
+      consola.info('Installing @snoka/server...')
       await (await import('@antfu/install-pkg')).installPackage('@snoka/server', { dev: true })
-      consola.success(`@snoka/server installed, please restart your command.`)
+      consola.success('@snoka/server installed, please restart your command.')
       process.exit(1)
     }
 
@@ -27,11 +27,11 @@ export async function server (options) {
     http.listen(port, () => {
       const url = `http://localhost:${port}`
       consola.success(`🚀 Server ready at ${url}`)
-      if (options.open) {
+      if (options.open)
         openInBrowser(url)
-      }
     })
-  } catch (e) {
+  }
+  catch (e) {
     consola.error(e)
     process.exit(1)
   }

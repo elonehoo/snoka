@@ -1,12 +1,12 @@
+import type { Context } from 'vm'
 import { withFilter } from 'graphql-subscriptions'
 import { arg, extendType, idArg, nonNull } from 'nexus'
-import { Context } from 'vm'
 import { getRunId, runs } from './Run.js'
 import { tests } from './Test.js'
 
 export const StatsExtendRun = extendType({
   type: 'Run',
-  definition (t) {
+  definition(t) {
     t.nonNull.int('testCount', {
       args: {
         status: arg({
@@ -26,7 +26,7 @@ export interface RunStatsUpdatedPayload {
 
 export const StatsExtendSubpscription = extendType({
   type: 'Subscription',
-  definition (t) {
+  definition(t) {
     t.field('runStatsUpdated', {
       type: 'Run',
       args: {
@@ -41,6 +41,6 @@ export const StatsExtendSubpscription = extendType({
   },
 })
 
-export function publishRunStatsUpdated (ctx: Context, runId: string) {
+export function publishRunStatsUpdated(ctx: Context, runId: string) {
   ctx.pubsub.publish(RunStatsUpdated, { runId } as RunStatsUpdatedPayload)
 }

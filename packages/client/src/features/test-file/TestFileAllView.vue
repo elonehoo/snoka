@@ -51,8 +51,8 @@ const { result, subscribeToMore, onResult } = useQuery(() => route.params.runId 
 `, () => ({
   ...route.params.runId !== 'last-run'
     ? {
-      runId: route.params.runId,
-    }
+        runId: route.params.runId,
+      }
     : {},
 }), {
   fetchPolicy: 'cache-and-network',

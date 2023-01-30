@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { FileIcon } from '@zhuowenli/vue-feather-icons'
 import StatusIcon from '../StatusIcon.vue'
 import Duration from '../Duration.vue'
-import { FileIcon } from '@zhuowenli/vue-feather-icons'
 
 const props = defineProps({
   file: Object,

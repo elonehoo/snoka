@@ -2,7 +2,7 @@ import type { StatusEnum } from '@snoka/server/src/schema'
 
 export type TestStatus = StatusEnum
 
-export function compareStatus (a: TestStatus, b: TestStatus): number {
+export function compareStatus(a: TestStatus, b: TestStatus): number {
   const indexA = order.indexOf(a)
   const indexB = order.indexOf(b)
   return indexA - indexB

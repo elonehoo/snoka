@@ -1,11 +1,12 @@
 import fs from 'fs-extra'
+import { dirname } from 'pathe'
 import type { Snapshot } from './types.js'
 import { SNAPSHOTS_VERSION } from './version.js'
 import { resolveSnapshotPath } from './util.js'
-import { dirname } from 'pathe'
 
-export async function writeSnapshots (testFile: string, snapshots: Snapshot[], useNewContent: boolean) {
-  if (!snapshots.length) return
+export async function writeSnapshots(testFile: string, snapshots: Snapshot[], useNewContent: boolean) {
+  if (!snapshots.length)
+    return
   const content = addNewLines([
     stringifyVersion(),
     ...snapshots.map(s => stringifySnapshot(s, useNewContent)),
@@ -15,20 +16,20 @@ export async function writeSnapshots (testFile: string, snapshots: Snapshot[], u
   await fs.writeFile(file, content, 'utf8')
 }
 
-function stringifyVersion () {
+function stringifyVersion() {
   return `// Snoka snapshots v${SNAPSHOTS_VERSION}`
 }
 
-function stringifySnapshot (snapshot: Snapshot, useNewContent: boolean) {
+function stringifySnapshot(snapshot: Snapshot, useNewContent: boolean) {
   let content: string
-  if (useNewContent) {
+  if (useNewContent)
     content = snapshot.newContent
-  } else {
+  else
     content = snapshot.content
-  }
+
   return `exports[\`${snapshot.title}\`] = \`${content ?? snapshot.content}\`;`
 }
 
-function addNewLines (lines: string[]) {
+function addNewLines(lines: string[]) {
   return lines.join('\n\n')
 }

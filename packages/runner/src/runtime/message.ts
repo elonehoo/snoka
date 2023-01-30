@@ -6,17 +6,16 @@ import type { MainMessage, WorkerRemoteMethods } from '../message.js'
 
 let workerPort: MessagePort
 
-export function initWorkerMessaging (port: MessagePort) {
+export function initWorkerMessaging(port: MessagePort) {
   workerPort = port
 
   workerPort.on('message', (message: MainMessage) => {
     const promise = toMainPromiseMap?.get(message.id)
     if (promise) {
-      if ('error' in message) {
+      if ('error' in message)
         promise.reject(message.error)
-      } else {
+      else
         promise.resolve(message.result)
-      }
     }
   })
 }
@@ -32,7 +31,7 @@ interface ToMainPromise {
 
 let toMainPromiseMap: Map<string, ToMainPromise> = new Map()
 
-export function toMainThread (): WorkerRemoteMethods {
+export function toMainThread(): WorkerRemoteMethods {
   if (!toMainProxy) {
     toMainPromiseMap = new Map()
     toMainProxy = new Proxy({}, {

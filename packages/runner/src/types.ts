@@ -1,6 +1,6 @@
 import type { SerializableSnokaConfig, TestEnvironmentBase } from '@snoka/config'
 import type { Awaitable } from '@snoka/utils'
-import { Snapshot } from './snapshot/types.js'
+import type { Snapshot } from './snapshot/types.js'
 
 export interface RunTestFileOptions {
   entry: string
@@ -96,9 +96,9 @@ export interface ReporterTest {
   error?: Error
 }
 
-type TestSuiteInfoPayload = { suite: ReporterTestSuite }
+interface TestSuiteInfoPayload { suite: ReporterTestSuite }
 type TestInfoPayload = TestSuiteInfoPayload & { test: ReporterTest }
-type OptionalTestInfoPayload = { suite: ReporterTestSuite | null, test: ReporterTest | null }
+interface OptionalTestInfoPayload { suite: ReporterTestSuite | null; test: ReporterTest | null }
 
 interface ErrorSummaryPayload {
   suites: ReporterTestSuite[]
@@ -125,7 +125,7 @@ interface SummaryPayload {
 }
 
 export interface Reporter {
-  log?: (payload: OptionalTestInfoPayload & { type: 'stdout' | 'stderr', text: string, file?: string }) => unknown
+  log?: (payload: OptionalTestInfoPayload & { type: 'stdout' | 'stderr'; text: string; file?: string }) => unknown
   suiteStart?: (payload: TestSuiteInfoPayload) => unknown
   suiteComplete?: (payload: TestSuiteInfoPayload) => unknown
   testFail?: (payload: TestInfoPayload) => unknown

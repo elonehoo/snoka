@@ -4,13 +4,13 @@ export const Json = scalarType({
   name: 'Json',
   asNexusMethod: 'json',
   description: 'JSON custom scalar type',
-  parseValue (value) {
+  parseValue(value) {
     return value
   },
-  serialize (value) {
+  serialize(value) {
     return value
   },
-  parseLiteral (valueNode) {
+  parseLiteral(valueNode) {
     return valueNode.loc
   },
 })

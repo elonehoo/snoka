@@ -22,16 +22,15 @@ export default defineComponent({
     'update:modelValue',
   ],
 
-  setup (props, { attrs }) {
+  setup(props, { attrs }) {
     const input = ref<HTMLInputElement>()
 
     onMounted(() => {
-      if (props.autoFocus) {
+      if (props.autoFocus)
         input.value?.focus()
-      }
     })
 
-    function focus () {
+    function focus() {
       input.value?.focus()
     }
 

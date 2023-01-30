@@ -4,7 +4,7 @@ import { diffStringsUnified } from 'jest-diff'
 import { formatDurationToString } from '@snoka/utils'
 import type { Reporter, ReporterTestSuite } from '../types.js'
 
-export function createConsoleFancyReporter (): Reporter {
+export function createConsoleFancyReporter(): Reporter {
   return {
     log: ({ type, text, suite, test, file }) => {
       consola.log(chalk.dim(`\n${chalk.bgGray.white(` ${type} `)} ${test ? `${suite.title} › ${chalk.bold(test.title)}` : file ?? 'unknown test'}\n`))
@@ -25,7 +25,8 @@ export function createConsoleFancyReporter (): Reporter {
           for (const child of suite.children) {
             if (child[0] === 'suite') {
               eachSuite(child[1])
-            } else if (child[0] === 'test') {
+            }
+            else if (child[0] === 'test') {
               const test = child[1]
               if (test.error) {
                 consola.log(chalk.red(`${chalk.bgRedBright.black.bold(' FAIL ')} ${suite.title} › ${chalk.bold(test.title)}`))
@@ -36,9 +37,8 @@ export function createConsoleFancyReporter (): Reporter {
         }
       }
 
-      for (const suite of suites) {
+      for (const suite of suites)
         eachSuite(suite)
-      }
     },
 
     snapshotSummary: ({ snapshotCount, failedSnapshots }) => {
@@ -66,18 +66,17 @@ export function createConsoleFancyReporter (): Reporter {
 
       let snapshotSummary = `${snapshotCount - failedSnapshotCount} / ${snapshotCount}`
       const snapshotDetails: string[] = []
-      if (failedSnapshotCount) {
+      if (failedSnapshotCount)
         snapshotDetails.push(`failed: ${failedSnapshotCount}`)
-      }
-      if (updatedSnapshotCount) {
+
+      if (updatedSnapshotCount)
         snapshotDetails.push(`updated: ${updatedSnapshotCount}`)
-      }
-      if (newSnapshotCount) {
+
+      if (newSnapshotCount)
         snapshotDetails.push(`new: ${newSnapshotCount}`)
-      }
-      if (snapshotDetails.length) {
+
+      if (snapshotDetails.length)
         snapshotSummary += ` (${snapshotDetails.join(', ')})`
-      }
 
       const stats = [
         ['Suites', `${suiteCount - errorSuiteCount} / ${suiteCount}`],
@@ -91,7 +90,7 @@ export function createConsoleFancyReporter (): Reporter {
   }
 }
 
-function drawBox (text: string, format?: (text: string) => string) {
+function drawBox(text: string, format?: (text: string) => string) {
   let result = `┌${'─'.repeat(text.length + 2)}┐\n`
   result += `│ ${format ? format(text) : text} │\n`
   result += `└${'─'.repeat(text.length + 2)}┘`

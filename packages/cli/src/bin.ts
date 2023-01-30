@@ -1,6 +1,6 @@
 import fs from 'fs'
-import { dirname, resolve } from 'pathe'
 import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'pathe'
 import sade from 'sade'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))

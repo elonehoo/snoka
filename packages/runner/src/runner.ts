@@ -1,13 +1,16 @@
 import { relative, resolve } from 'pathe'
 import fs from 'fs-extra'
-import Tinypool, { Options as PoolOptions } from 'tinypool'
+import type { Options as PoolOptions } from 'tinypool'
+import Tinypool from 'tinypool'
 import { createServer, mergeConfig } from 'vite'
 import { ViteNodeServer } from 'vite-node/server'
-import { Awaited } from '@snoka/utils'
-import { ProgramSnokaConfig, toSerializableConfig } from '@snoka/config'
+import type { Awaited } from '@snoka/utils'
+import type { ProgramSnokaConfig } from '@snoka/config'
+import { toSerializableConfig } from '@snoka/config'
 import type { runTestFile as rawRunTestFile } from './runtime/run-test-file.js'
-import type { RunTestFileOptions, ReporterTestSuite, Reporter, ReporterTest } from './types.js'
-import { createWorkerChannel, SuiteCollectData, useWorkerMessages } from './message.js'
+import type { Reporter, ReporterTest, ReporterTestSuite, RunTestFileOptions } from './types.js'
+import type { SuiteCollectData } from './message.js'
+import { createWorkerChannel, useWorkerMessages } from './message.js'
 import { clearCoverageTemp } from './coverage.js'
 
 export interface RunnerOptions {
@@ -19,7 +22,7 @@ interface Context {
   options: RunnerOptions
 }
 
-export async function setupRunner (options: RunnerOptions) {
+export async function setupRunner(options: RunnerOptions) {
   const ctx: Context = {
     options,
   }
@@ -60,15 +63,15 @@ export async function setupRunner (options: RunnerOptions) {
 
   const pool = new Tinypool(poolOptions)
 
-  async function runTestFileWorker (options: RunTestFileOptions): Promise<Awaited<ReturnType<typeof rawRunTestFile>> & { deps: string[] }> {
+  async function runTestFileWorker(options: RunTestFileOptions): Promise<Awaited<ReturnType<typeof rawRunTestFile>> & { deps: string[] }> {
     const suiteMap: { [id: string]: ReporterTestSuite } = {}
 
     const { mainPort, workerPort } = createWorkerChannel({
       fetchModule: async (id) => {
         if (id.match(/\.json$/)) {
-          if (id.startsWith('/')) {
+          if (id.startsWith('/'))
             id = id.substring(1)
-          }
+
           id = resolve(options.config.targetDirectory, id)
           const code = `const data = ${await fs.readFile(id, { encoding: 'utf8' })};Object.assign(exports, data);exports.default = data;`
           return {
@@ -85,14 +88,12 @@ export async function setupRunner (options: RunnerOptions) {
         const addSuite = (suite: SuiteCollectData) => {
           suiteMap[suite.id] = suite
           for (const child of suite.children) {
-            if (child[0] === 'suite') {
+            if (child[0] === 'suite')
               addSuite(child[1])
-            }
           }
         }
-        for (const suite of suites) {
+        for (const suite of suites)
           addSuite(suite)
-        }
       },
 
       onSuiteStart: ({ id }) => {
@@ -118,9 +119,8 @@ export async function setupRunner (options: RunnerOptions) {
 
       onTestError: (suiteId, testId, duration, error) => {
         // Parse error matcherResult
-        if (typeof error.matcherResult === 'string') {
+        if (typeof error.matcherResult === 'string')
           error.matcherResult = JSON.parse(error.matcherResult)
-        }
 
         const suite = suiteMap[suiteId]
         const [, test] = suite.children.find(([, t]) => t.id === testId) as ['test', ReporterTest]
@@ -151,7 +151,8 @@ export async function setupRunner (options: RunnerOptions) {
     const deps = new Set<string>()
     const addImports = async (filepath: string) => {
       const transformed = await viteNode.transformRequest(filepath)
-      if (!transformed) { return }
+      if (!transformed)
+        return
       const dependencies = [...transformed.deps ?? [], ...transformed.dynamicDeps ?? []]
       for (const dep of dependencies) {
         const path = await viteServer.pluginContainer.resolveId(dep, filepath, { ssr: true })
@@ -172,7 +173,7 @@ export async function setupRunner (options: RunnerOptions) {
     return result
   }
 
-  async function runTestFile (relativePath: string, clearDeps: string[] = [], updateSnapshots = false) {
+  async function runTestFile(relativePath: string, clearDeps: string[] = [], updateSnapshots = false) {
     const file = resolve(ctx.options.config.targetDirectory, relativePath)
     if (fs.existsSync(file)) {
       const result = await runTestFileWorker({
@@ -187,7 +188,7 @@ export async function setupRunner (options: RunnerOptions) {
       })
 
       // Patch filePath
-      result.suites.forEach(s => {
+      result.suites.forEach((s) => {
         s.filePath = relative(ctx.options.config.targetDirectory, s.filePath)
       })
 
@@ -195,7 +196,7 @@ export async function setupRunner (options: RunnerOptions) {
     }
   }
 
-  async function close () {
+  async function close() {
     await pool.destroy()
     await viteServer.close()
     clearOnMessage()

@@ -9,17 +9,17 @@ import type {
   BeforeEachFn,
   Context,
   DescribeFn,
-  TestFn,
-  TestSuite,
   Test,
   TestFlag,
+  TestFn,
+  TestSuite,
   TestSuiteChild,
 } from '../types'
 import { toMainThread } from './message.js'
 
 const SKIP_SUITE_HANDLER = ['skip', 'todo']
 
-export function setupTestCollector (ctx: Context): {
+export function setupTestCollector(ctx: Context): {
   exposed: {
     describe: DescribeFn
     test: TestFn
@@ -84,17 +84,17 @@ export function setupTestCollector (ctx: Context): {
   const addSuite = (title: string, handler: () => unknown, flag: TestFlag = null) => {
     const parentSuite = getCurrentSuite()
     const suite = createSuite(title, flag, parentSuite)
-    if (parentSuite) {
+    if (parentSuite)
       parentSuite.children.push(['suite', suite])
-    }
+
     currentSuites.push(suite)
-    if (handler && !SKIP_SUITE_HANDLER.includes(flag)) {
+    if (handler && !SKIP_SUITE_HANDLER.includes(flag))
       handler()
-    }
+
     currentSuites.pop()
   }
 
-  const describe = Object.assign(function describe (title: string, handler: () => unknown) {
+  const describe = Object.assign((title: string, handler: () => unknown) => {
     addSuite(title, handler)
   }, {
     skip: (title: string, handler: () => unknown) => {
@@ -108,7 +108,7 @@ export function setupTestCollector (ctx: Context): {
     },
   })
 
-  const test = Object.assign(function test (title: string, handler: () => unknown) {
+  const test = Object.assign((title: string, handler: () => unknown) => {
     addTest(title, handler)
   }, {
     skip: (title: string, handler: () => unknown) => {
@@ -122,19 +122,19 @@ export function setupTestCollector (ctx: Context): {
     },
   })
 
-  function beforeAll (handler: () => unknown) {
+  function beforeAll(handler: () => unknown) {
     getCurrentSuite().beforeAllHandlers.push(handler)
   }
 
-  function afterAll (handler: () => unknown) {
+  function afterAll(handler: () => unknown) {
     getCurrentSuite().afterAllHandlers.push(handler)
   }
 
-  function beforeEach (handler: () => unknown) {
+  function beforeEach(handler: () => unknown) {
     getCurrentSuite().beforeEachHandlers.push(handler)
   }
 
-  function afterEach (handler: () => unknown) {
+  function afterEach(handler: () => unknown) {
     getCurrentSuite().afterEachHandlers.push(handler)
   }
 
@@ -142,7 +142,7 @@ export function setupTestCollector (ctx: Context): {
    * Run the suite handlers to register suites and tests.
    * Shouldn't be exposed to the test files.
    */
-  async function collect () {
+  async function collect() {
     filterChildrenToRun(rootSuite)
 
     toMainThread().onCollected([
@@ -165,35 +165,34 @@ export function setupTestCollector (ctx: Context): {
 
 export type TestCollector = ReturnType<typeof setupTestCollector>
 
-function filterChildrenToRun (suite: TestSuite) {
+function filterChildrenToRun(suite: TestSuite) {
   let childrenToRun: TestSuiteChild[]
   const onlyChildren = suite.children.filter(([, t]) => t.flag === 'only')
-  if (onlyChildren.length) {
+  if (onlyChildren.length)
     childrenToRun = onlyChildren
-  } else {
+  else
     childrenToRun = suite.children.filter(([, t]) => t.flag !== 'skip' && t.flag !== 'todo')
-  }
+
   suite.childrenToRun = childrenToRun
 
   for (const child of suite.children) {
-    if (child[0] === 'suite') {
+    if (child[0] === 'suite')
       filterChildrenToRun(child[1])
-    }
   }
 }
 
-function mapSuite (suite: TestSuite): SuiteCollectData {
+function mapSuite(suite: TestSuite): SuiteCollectData {
   return {
     id: suite.id,
     title: suite.title,
     allTitles: suite.allTitles,
     flag: suite.flag,
-    children: suite.children.map(child => {
-      if (child[0] === 'suite') {
+    children: suite.children.map((child) => {
+      if (child[0] === 'suite')
         return ['suite', mapSuite(child[1])]
-      } else if (child[0] === 'test') {
+      else if (child[0] === 'test')
         return ['test', mapTest(child[1])]
-      }
+
       return null
     }),
     filePath: suite.filePath,
@@ -201,7 +200,7 @@ function mapSuite (suite: TestSuite): SuiteCollectData {
   }
 }
 
-function mapTest (test: Test): TestCollectData {
+function mapTest(test: Test): TestCollectData {
   return {
     id: test.id,
     title: test.title,

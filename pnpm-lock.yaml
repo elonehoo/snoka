@@ -35,7 +35,6 @@ importers:
       typescript: ^4.9.4
       vue: ^3.2.45
     dependencies:
-      '@snoka/server': link:../packages/server
       '@snoka/test': link:../packages/test
       lodash-es: 4.17.21
       node-fetch: 3.3.0
@@ -43,6 +42,8 @@ importers:
       ts-node: 10.9.1_awa2wsr5thmg3i7jqycphctjfq
       typescript: 4.9.4
       vue: 3.2.45
+    devDependencies:
+      '@snoka/server': link:../packages/server
 
   packages/cli:
     specifiers:

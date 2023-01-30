@@ -1,14 +1,19 @@
 <script lang="ts">
 import { computed, ref } from 'vue'
-
-const filterFailed = ref(false)
 </script>
 
 <script lang="ts" setup>
+import { SearchIcon, XIcon } from '@zhuowenli/vue-feather-icons'
+import type { NexusGenFieldTypes } from '@snoka/server/types'
 import BaseInput from '../BaseInput.vue'
 import SuiteItem from './SuiteItem.vue'
-import { SearchIcon, XIcon } from '@zhuowenli/vue-feather-icons'
-import { NexusGenFieldTypes } from '@snoka/server/types'
+
+const props = defineProps<{
+  suites: TestSuite[]
+  run: any
+}>()
+
+const filterFailed = ref(false)
 
 type TestSuite = Omit<NexusGenFieldTypes['TestSuite'], 'children'> & {
   __typename: 'TestSuite'
@@ -18,11 +23,6 @@ type TestSuite = Omit<NexusGenFieldTypes['TestSuite'], 'children'> & {
 type Test = NexusGenFieldTypes['Test'] & {
   __typename: 'Test'
 }
-
-const props = defineProps<{
-  suites: TestSuite[]
-  run: any
-}>()
 
 // Filtering
 
@@ -37,32 +37,37 @@ const failedTestCount = computed(() => {
   }, 0)
 })
 
-function isChildMatching (item: TestSuite | Test) {
+function isChildMatching(item: TestSuite | Test) {
   // If one of the nested is in 'error', the suite is also in 'error'
-  if (filterFailed.value && item.status !== 'error') return false
+  if (filterFailed.value && item.status !== 'error')
+    return false
   // Title search
-  if (searchReg.value && item.title.search(searchReg.value) === -1) return false
+  if (searchReg.value && item.title.search(searchReg.value) === -1)
+    return false
   return true
 }
 
-function isNestedMatching (item: TestSuite | Test) {
-  if (isChildMatching(item)) return true
-  if (item.__typename === 'TestSuite' && item.children.some(child => isNestedMatching(child))) return true
+function isNestedMatching(item: TestSuite | Test) {
+  if (isChildMatching(item))
+    return true
+  if (item.__typename === 'TestSuite' && item.children.some(child => isNestedMatching(child)))
+    return true
   return false
 }
 
 // Tree
 
 const tree = computed(() => {
-  if (!props.suites.length) return []
+  if (!props.suites.length)
+    return []
 
-  function processSuite (item: TestSuite): TestSuite {
+  function processSuite(item: TestSuite): TestSuite {
     return {
       ...item,
-      children: item.children.map(child => {
-        if (child.__typename === 'TestSuite') {
+      children: item.children.map((child) => {
+        if (child.__typename === 'TestSuite')
           return processSuite(props.suites.find(suite => suite.id === child.id) as TestSuite)
-        }
+
         return child
       }).filter(child => isNestedMatching(child)),
     }

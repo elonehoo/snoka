@@ -1,13 +1,34 @@
 <script lang="ts" setup>
 import {
+  CheckIcon,
+  ChevronsRightIcon,
   CircleIcon,
   ClockIcon,
-  CheckIcon,
-  XIcon,
-  ChevronsRightIcon,
   Edit2Icon,
+  XIcon,
 } from '@zhuowenli/vue-feather-icons'
 import type { TestStatus } from '../util/status'
+
+const props = defineProps({
+  status: {
+    type: String,
+    required: true,
+  },
+
+  icon: {},
+
+  iconClass: {},
+
+  bg: {
+    type: Boolean,
+    default: false,
+  },
+
+  pill: {
+    type: Boolean,
+    default: false,
+  },
+})
 
 const icons: Record<TestStatus, any> = {
   in_progress: ClockIcon,
@@ -40,27 +61,6 @@ const tooltips: Record<TestStatus, string> = {
   skipped: 'Skipped',
   todo: 'Todo',
 }
-
-const props = defineProps({
-  status: {
-    type: String,
-    required: true,
-  },
-
-  icon: {},
-
-  iconClass: {},
-
-  bg: {
-    type: Boolean,
-    default: false,
-  },
-
-  pill: {
-    type: Boolean,
-    default: false,
-  },
-})
 </script>
 
 <template>
@@ -72,7 +72,7 @@ const props = defineProps({
       class="relative"
       :class="[
         {
-          [bgClasses[status] + ' rounded-full !bg-opacity-25']: bg,
+          [`${bgClasses[status]} rounded-full !bg-opacity-25`]: bg,
         },
         iconClass,
       ]"
@@ -101,7 +101,7 @@ const props = defineProps({
       class="rounded-full !bg-opacity-25 px-2"
       :class="[
         bgClasses[status],
-        classes[status]
+        classes[status],
       ]"
     >
       {{ tooltips[status] }}

@@ -11,10 +11,10 @@ const removeServerRenderedText = html => html.replace(/ data-server-rendered="tr
 const removeDataTestAttributes = html => html.replace(/ data-test="[-\w]+"/g, '')
 
 export default {
-  test (received) {
+  test(received) {
     return isHtmlString(received)
   },
-  print (received) {
+  print(received) {
     let html = received || ''
     html = removeServerRenderedText(html)
     html = removeDataTestAttributes(html)

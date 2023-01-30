@@ -1,5 +1,5 @@
 import { performance } from 'perf_hooks'
-import { ProgramSnokaConfig } from '@snoka/config'
+import type { ProgramSnokaConfig } from '@snoka/config'
 import glob from 'fast-glob'
 import { setupRunner } from './runner.js'
 import { getStats } from './stats.js'
@@ -12,21 +12,22 @@ export interface RunAllOptions {
   updateSnapshots?: boolean
 }
 
-export async function runAllTests (config: ProgramSnokaConfig, options: RunAllOptions = {}) {
+export async function runAllTests(config: ProgramSnokaConfig, options: RunAllOptions = {}) {
   const reporters = config.reporters
-    ? config.reporters.map(id => {
+    ? config.reporters.map((id) => {
       if (id === 'console-fancy') {
         return createConsoleFancyReporter()
-      } else if (id === 'console-json') {
-        return createRawReporter(data => {
+      }
+      else if (id === 'console-json') {
+        return createRawReporter((data) => {
           console.log(JSON.stringify(data))
         })
       }
       return null
     }).filter(Boolean)
     : [
-      createConsoleFancyReporter(),
-    ]
+        createConsoleFancyReporter(),
+      ]
 
   let fileList = await glob(config.match, {
     cwd: config.targetDirectory,
@@ -60,17 +61,15 @@ export async function runAllTests (config: ProgramSnokaConfig, options: RunAllOp
   } = stats
 
   // Error summary
-  if (errorTestCount) {
+  if (errorTestCount)
     reporters.forEach(r => r.errorSummary?.({ suites, errorTestCount, testCount }))
-  }
-  if (failedSnapshots.length) {
+
+  if (failedSnapshots.length)
     reporters.forEach(r => r.snapshotSummary?.({ snapshotCount, failedSnapshots }))
-  }
 
   // Coverage
-  if (config.collectCoverage) {
+  if (config.collectCoverage)
     await reportCoverage(config.coverageOptions)
-  }
 
   // Summary
   const duration = endTime - time

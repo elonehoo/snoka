@@ -49,21 +49,20 @@ export interface TestEnvironmentContext {
 }
 
 export abstract class TestEnvironmentBase {
-  // eslint-disable-next-line no-useless-constructor
-  constructor (
+  constructor(
     public envName: string,
     protected config: SnokaConfig,
     protected context: TestEnvironmentContext,
   ) {}
 
-  abstract create (): Awaitable<void>
+  abstract create(): Awaitable<void>
 
-  abstract getResult (): Awaitable<any>
+  abstract getResult(): Awaitable<any>
 
-  abstract destroy (): Awaitable<void>
+  abstract destroy(): Awaitable<void>
 }
 
-export type InstantiableTestEnvironmentClass = {
+export interface InstantiableTestEnvironmentClass {
   new(...args: ConstructorParameters<typeof TestEnvironmentBase>): TestEnvironmentBase
 }
 

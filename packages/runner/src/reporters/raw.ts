@@ -1,6 +1,6 @@
-import { Reporter } from '../types.js'
+import type { Reporter } from '../types.js'
 
-export function createRawReporter (write: (data: Record<string, any>) => unknown): Reporter {
+export function createRawReporter(write: (data: Record<string, any>) => unknown): Reporter {
   return {
     log: ({ type, text, suite, test }) => {
       write({

@@ -2,10 +2,10 @@
   "name": "@snoka/client-dist",
   "version": "0.0.0",
   "description": "",
+  "author": "Elone Hoo <hi@elonehoo.me>",
+  "license": "MIT",
+  "keywords": [],
   "main": "index.js",
   "scripts": {
-  },
-  "keywords": [],
-  "author": "Elone Hoo <hi@elonehoo.me>",
-  "license": "MIT"
+  }
 }

@@ -3,11 +3,11 @@ import fs from 'fs-extra'
 import type { Snapshot } from './types.js'
 import { generateSnapshotId, resolveSnapshotPath } from './util.js'
 
-export async function readSnapshots (testFile: string): Promise<Snapshot[]> {
+export async function readSnapshots(testFile: string): Promise<Snapshot[]> {
   const file = resolveSnapshotPath(testFile)
-  if (!fs.existsSync(file)) {
+  if (!fs.existsSync(file))
     return []
-  }
+
   const content = await fs.readFile(file, 'utf8')
 
   const exports: Record<string, string> = {}

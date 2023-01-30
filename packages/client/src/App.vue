@@ -1,7 +1,3 @@
-<template>
-  <Layout />
-</template>
-
 <script lang="ts">
 import { defineComponent } from 'vue'
 import Layout from './features/Layout.vue'
@@ -14,3 +10,7 @@ export default defineComponent({
   },
 })
 </script>
+
+<template>
+  <Layout />
+</template>

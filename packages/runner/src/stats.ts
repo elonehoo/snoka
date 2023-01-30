@@ -2,7 +2,7 @@ import type { RunTestFileResult } from './runner.js'
 import type { Snapshot } from './snapshot/types.js'
 import type { ReporterTestSuite } from './types.js'
 
-export function getStats (results: RunTestFileResult[]) {
+export function getStats(results: RunTestFileResult[]) {
   let errorSuiteCount = 0
   let testCount = 0
   let errorTestCount = 0
@@ -24,14 +24,12 @@ export function getStats (results: RunTestFileResult[]) {
       errorTestCount += suite.testErrors
 
       for (const child of suite.children) {
-        if (child[0] === 'suite') {
+        if (child[0] === 'suite')
           processSuite(child[1])
-        }
       }
     }
-    for (const suite of file.suites) {
+    for (const suite of file.suites)
       processSuite(suite)
-    }
   }
 
   return {

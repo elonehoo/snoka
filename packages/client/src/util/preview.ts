@@ -1,4 +1,4 @@
-export function getIframeHtml (html: string, previewImports: string[]) {
+export function getIframeHtml(html: string, previewImports: string[]) {
   let result = html
   if (previewImports) {
     // Import module

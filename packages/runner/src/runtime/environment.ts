@@ -1,18 +1,19 @@
 import type { Window } from 'happy-dom'
 import { format as prettyFormat } from 'pretty-format'
-import { SnokaConfig, TestEnvironmentBase, InstantiableTestEnvironmentClass } from '@snoka/config'
+import type { InstantiableTestEnvironmentClass, SnokaConfig } from '@snoka/config'
+import { TestEnvironmentBase } from '@snoka/config'
 import HtmlFormat from '../snapshot/plugins/html.js'
 
 export class NodeEnvironment extends TestEnvironmentBase {
-  create () {
+  create() {
     // do nothing
   }
 
-  getResult () {
+  getResult() {
     // do nothing
   }
 
-  destroy () {
+  destroy() {
     // do nothing
   }
 }
@@ -21,7 +22,7 @@ export class DomEnvironment extends TestEnvironmentBase {
   window: Window
   globalKeys: string[]
 
-  async create () {
+  async create() {
     const { Window } = await import('happy-dom')
     const { KEYS } = await import('./dom-keys.js')
     this.window = new Window()
@@ -30,12 +31,11 @@ export class DomEnvironment extends TestEnvironmentBase {
       .filter(k => !k.startsWith('_'))
       .filter(k => !(k in global))
 
-    for (const key of this.globalKeys) {
+    for (const key of this.globalKeys)
       global[key] = this.window[key]
-    }
   }
 
-  getResult () {
+  getResult() {
     return {
       html: prettyFormat(this.window.document.documentElement.outerHTML, {
         plugins: [
@@ -45,7 +45,7 @@ export class DomEnvironment extends TestEnvironmentBase {
     }
   }
 
-  destroy () {
+  destroy() {
     this.globalKeys.forEach(key => delete global[key])
     this.globalKeys.length = 0
     this.window.happyDOM.cancelAsync()
@@ -58,14 +58,12 @@ const builtinEnvs = {
   dom: DomEnvironment,
 }
 
-export function getTestEnvironment (id: string, config: SnokaConfig): InstantiableTestEnvironmentClass {
-  if (id in builtinEnvs) {
+export function getTestEnvironment(id: string, config: SnokaConfig): InstantiableTestEnvironmentClass {
+  if (id in builtinEnvs)
     return builtinEnvs[id]
-  }
 
-  if (config.runtimeAvailableEnvs && id in config.runtimeAvailableEnvs) {
+  if (config.runtimeAvailableEnvs && id in config.runtimeAvailableEnvs)
     return config.runtimeAvailableEnvs[id] as InstantiableTestEnvironmentClass
-  }
 
   throw new Error(`Unknown test environment: ${id}. Did you register it in the config with the runtimeAvailableEnvs option?`)
 }

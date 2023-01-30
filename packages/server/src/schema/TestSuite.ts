@@ -2,14 +2,17 @@ import { fileURLToPath } from 'url'
 import { withFilter } from 'graphql-subscriptions'
 import { extendType, idArg, nonNull, objectType, stringArg, unionType } from 'nexus'
 import slugify from 'slugify'
-import { TestFlag } from '@snoka/runner'
+import type { TestFlag } from '@snoka/runner'
 import type { Context } from '../context'
 import { getSrcFile } from '../util.js'
 import { getRunId } from './Run.js'
-import { RunTestFile, RunTestFileData } from './RunTestFile.js'
-import { Status, StatusEnum } from './Status.js'
-import { createTest, TestData } from './Test.js'
-import { RunData } from './Run'
+import type { RunTestFileData } from './RunTestFile.js'
+import { RunTestFile } from './RunTestFile.js'
+import type { StatusEnum } from './Status.js'
+import { Status } from './Status.js'
+import type { TestData } from './Test.js'
+import { createTest } from './Test.js'
+import type { RunData } from './Run'
 
 const __filename = fileURLToPath(import.meta.url)
 
@@ -19,7 +22,7 @@ export const TestSuite = objectType({
     module: getSrcFile(__filename),
     export: 'TestSuiteData',
   },
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
     t.nonNull.string('slug')
     t.nonNull.string('title')
@@ -30,20 +33,19 @@ export const TestSuite = objectType({
     t.float('duration')
     t.nonNull.field('runTestFile', {
       type: RunTestFile,
-      resolve: (parent) => parent.runTestFile,
+      resolve: parent => parent.runTestFile,
     })
     t.nonNull.list.field('children', {
       type: nonNull(unionType({
         name: 'TestSuiteChild',
-        definition (t) {
+        definition(t) {
           t.members('TestSuite', 'Test')
         },
-        resolveType (source) {
-          if ('children' in source) {
+        resolveType(source) {
+          if ('children' in source)
             return 'TestSuite'
-          } else {
+          else
             return 'Test'
-          }
         },
       })),
       resolve: suite => suite.children.slice(0, 500), // Send a bit more for search
@@ -63,15 +65,15 @@ export const TestSuite = objectType({
 
 export const TestSuiteExtendRun = extendType({
   type: 'Run',
-  definition (t) {
+  definition(t) {
     t.nonNull.list.field('rootTestSuites', {
       type: nonNull(TestSuite),
-      resolve: (parent) => testSuites.filter(s => s.runId === parent.id && !s.parent),
+      resolve: parent => testSuites.filter(s => s.runId === parent.id && !s.parent),
     })
 
     t.nonNull.list.field('allTestSuites', {
       type: nonNull(TestSuite),
-      resolve: (parent) => testSuites.filter(s => s.runId === parent.id),
+      resolve: parent => testSuites.filter(s => s.runId === parent.id),
     })
 
     t.field('testSuiteById', {
@@ -87,15 +89,15 @@ export const TestSuiteExtendRun = extendType({
       args: {
         slug: nonNull(stringArg()),
       },
-      resolve: (run, { slug }) => testSuites.find(s => s.runId === run.id && s.slug === slug) ??
-        findSuiteInPreviousErrorFiles(run, slug),
+      resolve: (run, { slug }) => testSuites.find(s => s.runId === run.id && s.slug === slug)
+        ?? findSuiteInPreviousErrorFiles(run, slug),
     })
   },
 })
 
 export const TestSuiteExtendQuery = extendType({
   type: 'Query',
-  definition (t) {
+  definition(t) {
     t.field('testSuiteById', {
       type: TestSuite,
       args: {
@@ -126,7 +128,7 @@ export interface TestSuiteCompletedPayload {
 
 export const TestSuiteSubscriptions = extendType({
   type: 'Subscription',
-  definition (t) {
+  definition(t) {
     t.nonNull.field('testSuiteAdded', {
       type: TestSuite,
       args: {
@@ -205,7 +207,7 @@ export interface CreateTestsuiteOptions {
   parent: TestSuiteData
 }
 
-export async function createTestSuite (ctx: Context, data: CreateTestSuiteData, options: CreateTestsuiteOptions) {
+export async function createTestSuite(ctx: Context, data: CreateTestSuiteData, options: CreateTestsuiteOptions) {
   const testSuite: TestSuiteData = {
     id: data.id,
     slug: slugify(data.allTitles.join('-')),
@@ -233,7 +235,8 @@ export async function createTestSuite (ctx: Context, data: CreateTestSuiteData, 
         parent: testSuite,
       })
       testSuite.children.push(childSuite)
-    } else if (child[0] === 'test') {
+    }
+    else if (child[0] === 'test') {
       const childTestData = child[1]
       const childTest = await createTest(ctx, {
         id: childTestData.id,
@@ -254,15 +257,15 @@ export async function createTestSuite (ctx: Context, data: CreateTestSuiteData, 
   return testSuite
 }
 
-export function getTestSuite (ctx: Context, id: string) {
+export function getTestSuite(ctx: Context, id: string) {
   const testSuite = testSuites.find(s => s.id === id)
-  if (!testSuite) {
+  if (!testSuite)
     throw new Error(`Test suite ${id} not found`)
-  }
+
   return testSuite
 }
 
-export async function updateTestSuite (ctx: Context, id: string, data: Partial<Omit<TestSuiteData, 'id' | 'runId' | 'testFileId'>>) {
+export async function updateTestSuite(ctx: Context, id: string, data: Partial<Omit<TestSuiteData, 'id' | 'runId' | 'testFileId'>>) {
   const testSuite = await getTestSuite(ctx, id)
   Object.assign(testSuite, data)
   ctx.pubsub.publish(TestSuiteUpdated, {
@@ -276,20 +279,19 @@ export async function updateTestSuite (ctx: Context, id: string, data: Partial<O
   return testSuite
 }
 
-export function clearTestSuites (ctx: Context, runId: string = null) {
+export function clearTestSuites(ctx: Context, runId: string = null) {
   testSuites = runId ? testSuites.filter(s => s.runId !== runId) : []
 }
 
-function findSuiteInPreviousErrorFiles (run: RunData, suiteSlug: string) {
+function findSuiteInPreviousErrorFiles(run: RunData, suiteSlug: string) {
   for (const rf of run.previousErrorRunTestFiles) {
     const s = testSuites.find(s => s.runId === rf.runId && s.slug === suiteSlug)
-    if (s) {
+    if (s)
       return s
-    }
   }
   return null
 }
 
-function getInitialStatus (data: CreateTestData | CreateTestSuiteData, hasOnlyFlags: boolean) {
+function getInitialStatus(data: CreateTestData | CreateTestSuiteData, hasOnlyFlags: boolean) {
   return data.flag === 'todo' ? 'todo' : (hasOnlyFlags && data.flag !== 'only') || data.flag === 'skip' ? 'skipped' : 'in_progress'
 }

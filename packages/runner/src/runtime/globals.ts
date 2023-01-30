@@ -1,7 +1,7 @@
 import type { Context } from '../types.js'
 import type { TestCollector } from './collect-tests.js'
 
-export async function getGlobals (ctx: Context, collector: TestCollector) {
+export async function getGlobals(ctx: Context, collector: TestCollector) {
   const { default: sinon } = await import('sinon')
   const { expect } = await import('expect')
 

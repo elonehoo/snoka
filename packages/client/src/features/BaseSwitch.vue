@@ -20,7 +20,7 @@ export default defineComponent({
   <div
     class="select-none"
     :class="{
-      checked: modelValue,
+      'checked': modelValue,
       'opacity-50': disabled,
     }"
   >

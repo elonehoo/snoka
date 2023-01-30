@@ -1,14 +1,17 @@
+import type {
+  FetchResult,
+  Operation,
+} from '@apollo/client/core'
 import {
   ApolloClient,
-  InMemoryCache,
   ApolloLink,
-  Operation,
+  InMemoryCache,
   Observable,
-  FetchResult,
 } from '@apollo/client/core'
 import { onError } from '@apollo/client/link/error'
 import { logErrorMessages } from '@vue/apollo-util'
-import { createClient, ClientOptions, Client } from 'graphql-ws'
+import type { Client, ClientOptions } from 'graphql-ws'
+import { createClient } from 'graphql-ws'
 import { print } from 'graphql'
 import { ref } from 'vue'
 
@@ -16,16 +19,15 @@ const apiUrl = import.meta.env.VITE_GQL_URL as string
 
 // WebSocket link
 let wsUrl: string
-if (apiUrl.includes('http')) {
+if (apiUrl.includes('http'))
   wsUrl = apiUrl.replace('http', 'ws')
-} else {
+else
   wsUrl = `${window.location.protocol.replace('http', 'ws')}${window.location.hostname}:${window.location.port}${apiUrl}`
-}
 
 class WebSocketLink extends ApolloLink {
   client: Client
 
-  constructor (options: ClientOptions) {
+  constructor(options: ClientOptions) {
     super()
     let activeSocket: any
     let timedOut: any
@@ -35,24 +37,24 @@ class WebSocketLink extends ApolloLink {
       keepAlive: 10_000, // 10s
       ...options,
       on: {
-        opened: (socket) => (activeSocket = socket),
+        opened: socket => (activeSocket = socket),
         ping: (received) => {
           if (!received /* sent */) {
             timedOut = setTimeout(() => {
-              if (activeSocket.readyState === WebSocket.OPEN) { activeSocket.close(4408, 'Request Timeout') }
+              if (activeSocket.readyState === WebSocket.OPEN)
+                activeSocket.close(4408, 'Request Timeout')
             }, 5_000) // wait 5 seconds for the pong and then close the connection
           }
         },
         pong: (received) => {
-          if (received) {
+          if (received)
             clearTimeout(timedOut) // pong is received, clear connection close timeout
-          }
         },
       },
     })
   }
 
-  public request (operation: Operation): Observable<FetchResult> {
+  public request(operation: Operation): Observable<FetchResult> {
     return new Observable((sink) => {
       return this.client.subscribe<FetchResult>(
         { ...operation, query: print(operation.query) },
@@ -87,17 +89,16 @@ const wsLink = new WebSocketLink({
   retryAttempts: Infinity,
 })
 
-const link = onError(error => {
+const link = onError((error) => {
   logErrorMessages(error)
 }).concat(wsLink)
 
 // Cache implementation
-function dedupeRefs (existing: { __ref: string }[], incoming: { __ref: string }[]) {
+function dedupeRefs(existing: { __ref: string }[], incoming: { __ref: string }[]) {
   const result = existing.map(item => item.__ref)
   for (const item of incoming) {
-    if (!result.includes(item.__ref)) {
+    if (!result.includes(item.__ref))
       result.push(item.__ref)
-    }
   }
   return result.map(__ref => ({ __ref }))
 }
@@ -108,7 +109,8 @@ const cache = new InMemoryCache({
       fields: {
         testSuites: {
           merge: (existing, incoming) => {
-            if (!existing) return incoming
+            if (!existing)
+              return incoming
             return dedupeRefs(existing, incoming)
           },
         },
@@ -136,9 +138,9 @@ export const connected = ref(false)
 let disconnected = false
 
 wsLink.client.on('connected', () => {
-  if (disconnected) {
+  if (disconnected)
     resetApollo()
-  }
+
   disconnected = false
   connected.value = true
 })
@@ -148,7 +150,7 @@ wsLink.client.on('closed', () => {
   connected.value = false
 })
 
-async function resetApollo () {
+async function resetApollo() {
   console.log('[Reset Apollo Client]')
   await apolloClient.resetStore()
 }

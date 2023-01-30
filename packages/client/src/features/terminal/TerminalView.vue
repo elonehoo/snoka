@@ -1,13 +1,15 @@
 <script lang="ts">
 import 'xterm/css/xterm.css'
 
-import { ref, onMounted, watch, onUnmounted, onActivated, computed, defineComponent, PropType } from 'vue'
-import { IDisposable, Terminal } from 'xterm'
+import type { PropType } from 'vue'
+import { computed, defineComponent, onActivated, onMounted, onUnmounted, ref, watch } from 'vue'
+import type { IDisposable } from 'xterm'
+import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { SearchAddon } from 'xterm-addon-search'
 import { WebLinksAddon } from 'xterm-addon-web-links'
 import { WebglAddon } from 'xterm-addon-webgl'
-// @ts-ignore
+// @ts-expect-error
 import { ResizeObserver } from 'vue-resize'
 import { useSettings } from '../settings'
 
@@ -66,28 +68,27 @@ export default defineComponent({
 
   props: {
     logs: {
-      type: Array as PropType<{ type: 'stdout' | 'stderr', text: string }[]>,
+      type: Array as PropType<{ type: 'stdout' | 'stderr'; text: string }[]>,
       required: true,
     },
   },
 
-  setup (props) {
+  setup(props) {
     const listeners: IDisposable[] = []
 
     // Theme
     const { settings } = useSettings()
 
     const currentTheme = computed(() => {
-      if (settings.value?.darkMode) {
+      if (settings.value?.darkMode)
         return darkTheme
-      }
+
       return defaultTheme
     })
 
-    watch(currentTheme, value => {
-      if (term) {
+    watch(currentTheme, (value) => {
+      if (term)
         term.options.theme = value
-      }
     })
 
     // XTerminal
@@ -100,7 +101,7 @@ export default defineComponent({
     const el = ref(null)
     const xtermTarget = ref<HTMLElement | null>(null)
 
-    function createTerminal () {
+    function createTerminal() {
       if (!term && xtermTarget.value) {
         term = new Terminal({
           theme: currentTheme.value,
@@ -121,9 +122,8 @@ export default defineComponent({
 
         term.open(xtermTarget.value)
 
-        if (isWebgl2Supported()) {
+        if (isWebgl2Supported())
           term.loadAddon(new WebglAddon())
-        }
 
         // Scroll
         // listeners.push(term.onScroll(position => {
@@ -151,9 +151,8 @@ export default defineComponent({
       // term.scrollToLine(cached.scroll)
       // term._core._onScroll.fire(cached.scroll)
 
-      for (const log of props.logs) {
+      for (const log of props.logs)
         term.writeln(log.text)
-      }
     }
 
     onMounted(() => {
@@ -165,24 +164,22 @@ export default defineComponent({
     })
 
     onUnmounted(() => {
-      for (const off of listeners) {
+      for (const off of listeners)
         off.dispose()
-      }
+
       listeners.length = 0
     })
 
     // Element resize
-    function onElResize () {
-      if (term) {
+    function onElResize() {
+      if (term)
         fitAddon.fit()
-      }
     }
 
-    watch(() => props.logs, value => {
+    watch(() => props.logs, (value) => {
       term.clear()
-      for (const log of props.logs) {
+      for (const log of props.logs)
         term.writeln(log.text)
-      }
     })
 
     return {
@@ -204,6 +201,6 @@ export default defineComponent({
       class="w-full h-full"
     />
 
-    <resize-observer @notify="onElResize()" />
+    <ResizeObserver @notify="onElResize()" />
   </div>
 </template>

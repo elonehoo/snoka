@@ -1,6 +1,13 @@
 <script lang="ts">
 import gql from 'graphql-tag'
 import type { NexusGenFieldTypes } from '@snoka/server/types'
+</script>
+
+<script lang="ts" setup>
+import type { PropType } from 'vue'
+import TestItem from '../test/TestItem.vue'
+import StatusIcon from '../StatusIcon.vue'
+import Duration from '../Duration.vue'
 
 export const testSuiteItemFragment = gql`fragment testSuiteItem on TestSuite {
   id
@@ -27,13 +34,6 @@ export type TestSuiteItem = Pick<NexusGenFieldTypes['TestSuite'],
 'runTestFile' |
 'children' |
 'childCount'>
-</script>
-
-<script lang="ts" setup>
-import TestItem from '../test/TestItem.vue'
-import StatusIcon from '../StatusIcon.vue'
-import Duration from '../Duration.vue'
-import { PropType } from 'vue'
 
 const props = defineProps({
   suite: {

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import RunItem from './RunItem.vue'
 import { RotateCcwIcon } from '@zhuowenli/vue-feather-icons'
 import { useQuery } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { computed, defineEmits, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { NexusGenFieldTypes } from '@snoka/server/types'
+import type { NexusGenFieldTypes } from '@snoka/server/types'
+import RunItem from './RunItem.vue'
 
 const emit = defineEmits(['close'])
 
@@ -66,12 +66,12 @@ subscribeToMore<undefined, {
   ${runListFragment}
   `,
   updateQuery: (previousResult, { subscriptionData: { data } }) => {
-    if (previousResult.runs.find(f => f.id === data.runAdded.id)) return previousResult
+    if (previousResult.runs.find(f => f.id === data.runAdded.id))
+      return previousResult
 
     let runs = previousResult.runs
-    if (runs.length > MAX_RUNS) {
+    if (runs.length > MAX_RUNS)
       runs = runs.slice(1)
-    }
 
     return {
       runs: [
@@ -104,7 +104,7 @@ subscribeToMore<undefined, {
   },
 })
 
-function close () {
+function close() {
   emit('close')
 }
 

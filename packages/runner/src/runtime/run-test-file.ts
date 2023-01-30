@@ -1,32 +1,33 @@
 import { performance } from 'perf_hooks'
-import { resolve, relative } from 'pathe'
+import { relative, resolve } from 'pathe'
 import { install as installSourceMap } from 'source-map-support'
 import consola from 'consola'
 import fs from 'fs-extra'
 import pragma from 'pragma'
 import { expect } from 'expect'
-import { InstantiableTestEnvironmentClass, mergeConfig } from '@snoka/config'
+import type { InstantiableTestEnvironmentClass } from '@snoka/config'
+import { mergeConfig } from '@snoka/config'
 import type { Context, ReporterTest, ReporterTestSuite, RunTestFileOptions, Test, TestSuite } from '../types.js'
+import { SnapshotMatcher } from '../snapshot/matcher.js'
 import { execute } from './execute.js'
 import { getGlobals } from './globals.js'
 import { runTests } from './run-tests.js'
 import { setupTestCollector } from './collect-tests.js'
 import { useCollectCoverage } from './coverage.js'
 import { mockedModules } from './mocked-files.js'
-import { getTestEnvironment, NodeEnvironment } from './environment.js'
+import { NodeEnvironment, getTestEnvironment } from './environment.js'
 import { createMockedFileSystem } from './fs.js'
 import { moduleCache, sourceMaps } from './module-cache.js'
 import { baseConfig, setupWorker } from './setup.js'
 import { toMainThread } from './message.js'
 import { setCurrentTestFile } from './global-context.js'
-import { SnapshotMatcher } from '../snapshot/matcher.js'
 
 const snapshotMatcher = new SnapshotMatcher()
 expect.extend({
   toMatchSnapshot: snapshotMatcher.toMatchSnapshot.bind(snapshotMatcher),
 })
 
-export async function runTestFile (options: RunTestFileOptions) {
+export async function runTestFile(options: RunTestFileOptions) {
   try {
     setCurrentTestFile(relative(options.config.targetDirectory, options.entry))
     const time = performance.now()
@@ -35,14 +36,13 @@ export async function runTestFile (options: RunTestFileOptions) {
     const config = mergeConfig(baseConfig, options.config)
 
     if (options.clearDeps) {
-      options.clearDeps.forEach(file => {
+      options.clearDeps.forEach((file) => {
         moduleCache.delete(file)
         moduleCache.delete(`/@fs/${file}`)
         for (const key of moduleCache.keys()) {
           const [start] = key.split('?')
-          if (file.includes(start)) {
+          if (file.includes(start))
             moduleCache.delete(key)
-          }
         }
       })
     }
@@ -55,11 +55,11 @@ export async function runTestFile (options: RunTestFileOptions) {
       const index = source.indexOf('/* @snoka')
       if (index !== -1) {
         const endIndex = source.indexOf('*/', index)
-        if (endIndex !== -1) {
+        if (endIndex !== -1)
           pragmaObject = pragma(source.substring(index, endIndex + 2)).snoka
-        }
       }
-    } catch (e) {
+    }
+    catch (e) {
       consola.warn(`Failed to parse pragma for ${options.entry}: ${e.message}`)
     }
 
@@ -92,13 +92,13 @@ export async function runTestFile (options: RunTestFileOptions) {
     // Runtime env
     const runtimeEnvOption = ctx.pragma.runtimeEnv ?? config.runtimeEnv
     let RuntimeEnv: InstantiableTestEnvironmentClass
-    if (typeof runtimeEnvOption === 'string') {
+    if (typeof runtimeEnvOption === 'string')
       RuntimeEnv = getTestEnvironment(runtimeEnvOption, config)
-    } else if (runtimeEnvOption) {
+    else if (runtimeEnvOption)
       RuntimeEnv = runtimeEnvOption
-    } else {
+    else
       RuntimeEnv = NodeEnvironment
-    }
+
     const runtimeEnv = new RuntimeEnv(
       typeof runtimeEnvOption === 'string' ? runtimeEnvOption : runtimeEnvOption.envName,
       config, {
@@ -110,17 +110,15 @@ export async function runTestFile (options: RunTestFileOptions) {
     await runtimeEnv.create()
 
     let ufs
-    if ((config.mockFs && ctx.pragma.mockFs !== false) || ctx.pragma.mockFs) {
+    if ((config.mockFs && ctx.pragma.mockFs !== false) || ctx.pragma.mockFs)
       ufs = createMockedFileSystem()
-    }
 
     const files: string[] = []
 
     // Setup files
     if (config.setupFiles?.length) {
-      for (const file of config.setupFiles) {
+      for (const file of config.setupFiles)
         files.push(resolve(config.targetDirectory, file))
-      }
     }
 
     // Test file
@@ -150,13 +148,14 @@ export async function runTestFile (options: RunTestFileOptions) {
     }
 
     // Run all tests in the test file
-    if (ufs) ufs._enabled = true
+    if (ufs)
+      ufs._enabled = true
     await runTests(ctx, !options.updateSnapshots)
-    if (ufs) ufs._enabled = false
+    if (ufs)
+      ufs._enabled = false
 
-    if (config.collectCoverage) {
+    if (config.collectCoverage)
       await collectCoverage()
-    }
 
     const {
       failedSnapshots,
@@ -184,15 +183,17 @@ export async function runTestFile (options: RunTestFileOptions) {
         name: runtimeEnv.envName,
       },
     }
-  } catch (e) {
+  }
+  catch (e) {
     consola.error(`Running tests failed: ${e.stack}`)
     throw e
-  } finally {
+  }
+  finally {
     setCurrentTestFile(null)
   }
 }
 
-function mapTestResult (t: Test): ReporterTest {
+function mapTestResult(t: Test): ReporterTest {
   return {
     id: t.id,
     title: t.title,
@@ -202,7 +203,7 @@ function mapTestResult (t: Test): ReporterTest {
   }
 }
 
-function mapSuiteResult (s: TestSuite): ReporterTestSuite {
+function mapSuiteResult(s: TestSuite): ReporterTestSuite {
   return {
     id: s.id,
     title: s.title,
@@ -211,12 +212,12 @@ function mapSuiteResult (s: TestSuite): ReporterTestSuite {
     flag: s.flag,
     testErrors: s.testErrors,
     otherErrors: s.otherErrors,
-    children: s.children.map(child => {
-      if (child[0] === 'suite') {
+    children: s.children.map((child) => {
+      if (child[0] === 'suite')
         return ['suite', mapSuiteResult(child[1])]
-      } else if (child[0] === 'test') {
+      else if (child[0] === 'test')
         return ['test', mapTestResult(child[1])]
-      }
+
       return null
     }),
     runTestCount: s.ranTests.length,

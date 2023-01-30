@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable prefer-spread */
 
 import * as fs from 'fs'
@@ -13,7 +12,7 @@ type ReaddirEntry = string | Buffer | fs.Dirent
 let _ufs: typeof fs
 let _memfs: InstanceType<typeof Volume>
 
-export function createMockedFileSystem (): any {
+export function createMockedFileSystem(): any {
   if (_ufs) {
     _memfs.reset()
     return _ufs
@@ -34,26 +33,27 @@ export function createMockedFileSystem (): any {
 
   for (const [fsList, methods] of [[readFss, fsSyncMethodsRead], [writeFss, fsSyncMethodsWrite]] as any[]) {
     for (const method of methods) {
-      if (specialMethods.includes(method)) continue
+      if (specialMethods.includes(method))
+        continue
 
       ufs[method] = (...args) => {
-        if (!ufs._enabled) {
+        if (!ufs._enabled)
           return realFs[method].apply(realFs, args)
-        }
 
         let error: Error = null
         for (const s of fsList) {
           try {
             error = null
-            if (!s[method]) throw new Error(`${method} not found`)
+            if (!s[method])
+              throw new Error(`${method} not found`)
             return s[method].apply(s, args)
-          } catch (e) {
+          }
+          catch (e) {
             error = e
           }
         }
-        if (error) {
+        if (error)
           throw error
-        }
       }
     }
   }
@@ -62,12 +62,12 @@ export function createMockedFileSystem (): any {
 
   for (const [fsList, methods] of [[readFss, fsAsyncMethodsRead], [writeFss, fsAsyncMethodsWrite]] as any[]) {
     for (const method of methods) {
-      if (specialMethods.includes(method)) continue
+      if (specialMethods.includes(method))
+        continue
 
       ufs[method] = (...args) => {
-        if (!ufs._enabled) {
+        if (!ufs._enabled)
           return realFs[method].apply(realFs, args)
-        }
 
         let cbArgIndex = args.length - 1
         let cb = args[cbArgIndex]
@@ -80,31 +80,29 @@ export function createMockedFileSystem (): any {
         let error: Error = null
 
         const iterate = (i: number, err: Error) => {
-          if (err) {
+          if (err)
             error = err
-          }
 
           if (i >= fsList.length) {
-            if (cb) cb(error)
+            if (cb)
+              cb(error)
             return
           }
 
           args[cbArgIndex] = (e, ...a) => {
-            if (e) {
+            if (e)
               iterate(i + 1, e)
-            } else if (cb) {
+            else if (cb)
               cb.call(cb, e, ...a)
-            }
           }
 
           const s = fsList[i]
           const func = s[method]
 
-          if (!func) {
+          if (!func)
             iterate(i + 1, new Error(`${method} not found`))
-          } else {
+          else
             func.apply(s, args)
-          }
         }
         iterate(0, null)
       }
@@ -117,35 +115,36 @@ export function createMockedFileSystem (): any {
 
   for (const [fsList, methods] of [[readFss, fsPromiseMethodsRead], [writeFss, fsPromiseMethodsWrite]] as any[]) {
     for (const method of methods) {
-      if (specialMethods.includes(method)) continue
+      if (specialMethods.includes(method))
+        continue
 
       ufs.promises[method] = async (...args) => {
-        if (!ufs._enabled) {
+        if (!ufs._enabled)
           return realFs.promises[method].apply(realFs, args)
-        }
 
         let error: Error = null
         for (const s of fsList) {
           try {
             error = null
-            if (!s.promises?.[method]) throw new Error(`promises.${method} not found`)
+            if (!s.promises?.[method])
+              throw new Error(`promises.${method} not found`)
             const result = await s.promises[method].apply(s, args)
             // Use await to catch errors
             return result
-          } catch (e) {
+          }
+          catch (e) {
             error = e
           }
         }
-        if (error) {
+        if (error)
           throw error
-        }
       }
     }
   }
 
   ufs.watch = (...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.watch(...args)
     }
 
@@ -154,7 +153,8 @@ export function createMockedFileSystem (): any {
       try {
         const watcher = s.watch.apply(s, args)
         watchers.push(watcher)
-      } catch (e) {}
+      }
+      catch (e) {}
     }
 
     // return a proxy to call functions on these props
@@ -163,20 +163,21 @@ export function createMockedFileSystem (): any {
 
   ufs.watchFile = (...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       realFs.watchFile(...args)
     }
 
     for (const s of readFss) {
       try {
         s.watchFile.apply(s, args)
-      } catch (e) {}
+      }
+      catch (e) {}
     }
   }
 
   ufs.unwatchFile = (...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       realFs.unwatchFile(...args)
     }
 
@@ -184,23 +185,22 @@ export function createMockedFileSystem (): any {
   }
 
   ufs.existsSync = (path: string) => {
-    if (!ufs._enabled) {
+    if (!ufs._enabled)
       return realFs.existsSync(path)
-    }
 
     for (const s of readFss) {
       try {
-        if (s.existsSync(path)) {
+        if (s.existsSync(path))
           return true
-        }
-      } catch (e) {}
+      }
+      catch (e) {}
     }
     return false
   }
 
   ufs.readdirSync = (...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.readdirSync(...args)
     }
 
@@ -210,24 +210,24 @@ export function createMockedFileSystem (): any {
     for (const s of readFss) {
       try {
         error = null
-        if (!s.readdirSync) throw new Error('readdirSync not found')
-        for (const entry of s.readdirSync.apply(s, args)) {
+        if (!s.readdirSync)
+          throw new Error('readdirSync not found')
+        for (const entry of s.readdirSync.apply(s, args))
           result.set(getPathFromReaddirEntry(entry), entry)
-        }
-      } catch (e) {
+      }
+      catch (e) {
         error = e
       }
     }
-    if (error && result.size === 0) {
+    if (error && result.size === 0)
       throw error
-    }
 
     return getSortedArrayFromReaddirResult(result)
   }
 
   ufs.readdir = (...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.readdir(...args)
     }
 
@@ -243,48 +243,44 @@ export function createMockedFileSystem (): any {
     const result = new Map<string, ReaddirEntry>()
 
     const iterate = (i: number, err: Error) => {
-      if (err) {
+      if (err)
         error = err
-      }
 
       if (i >= readFss.length) {
-        if (cb) cb(error)
+        if (cb)
+          cb(error)
         return
       }
 
       args[cbArgIndex] = (e, entries: ReaddirEntry[]) => {
-        if (result.size === 0 && e) {
+        if (result.size === 0 && e)
           return iterate(i + 1, e)
-        }
 
         if (entries) {
-          for (const entry of entries) {
+          for (const entry of entries)
             result.set(getPathFromReaddirEntry(entry), entry)
-          }
         }
 
-        if (i === readFss.length - 1) {
+        if (i === readFss.length - 1)
           cb(null, getSortedArrayFromReaddirResult(result))
-        } else {
+        else
           iterate(i + 1, e)
-        }
       }
 
       const s = readFss[i]
       const func = s.readdir
 
-      if (!func) {
+      if (!func)
         iterate(i + 1, new Error('readdir not found'))
-      } else {
+      else
         func.apply(s, args)
-      }
     }
     iterate(0, null)
   }
 
   ufs.promises.readdir = async (...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.promises.readdir(...args)
     }
 
@@ -294,18 +290,19 @@ export function createMockedFileSystem (): any {
     for (const s of readFss) {
       try {
         error = null
-        if (!s.promises?.readdir) throw new Error('promises.readdir not found')
-        for (const entry of await s.promises.readdir.apply(s, args)) {
+        if (!s.promises?.readdir)
+          throw new Error('promises.readdir not found')
+        for (const entry of await s.promises.readdir.apply(s, args))
           result.set(getPathFromReaddirEntry(entry), entry)
-        }
-      } catch (e) {
+      }
+      catch (e) {
         error = e
       }
     }
 
-    if (error) {
+    if (error)
       throw error
-    }
+
     return getSortedArrayFromReaddirResult(result)
   }
 
@@ -319,15 +316,17 @@ export function createMockedFileSystem (): any {
 
     for (const s of readFss) {
       try {
-        if (!s.createReadStream) throw new Error('createReadStream not found')
+        if (!s.createReadStream)
+          throw new Error('createReadStream not found')
 
         const stream = s.createReadStream(path)
-        if (!stream) {
+        if (!stream)
           throw new Error('couldn\'t create read stream')
-        }
+
         ufs.ReadStream = s.ReadStream
         return stream
-      } catch (e) {
+      }
+      catch (e) {
         error = e
       }
     }
@@ -345,15 +344,17 @@ export function createMockedFileSystem (): any {
 
     for (const s of writeFss) {
       try {
-        if (!s.createWriteStream) throw new Error('createWriteStream not found')
+        if (!s.createWriteStream)
+          throw new Error('createWriteStream not found')
 
         const stream = s.createWriteStream(path)
-        if (!stream) {
+        if (!stream)
           throw new Error('couldn\'t create write stream')
-        }
+
         ufs.WriteStream = s.WriteStream
         return stream
-      } catch (e) {
+      }
+      catch (e) {
         error = e
       }
     }
@@ -363,50 +364,51 @@ export function createMockedFileSystem (): any {
 
   ufs.writeFile = (path, ...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.writeFile(path, ...args)
     }
 
     memfs.mkdirpSync(dirname(path))
-    // @ts-ignore
+    // @ts-expect-error
     return memfs.writeFile(path, ...args)
   }
 
   ufs.writeFileSync = (path, ...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.writeFileSync(path, ...args)
     }
 
     memfs.mkdirpSync(dirname(path))
-    // @ts-ignore
+    // @ts-expect-error
     return memfs.writeFileSync(path, ...args)
   }
 
   ufs.promises.writeFile = (path, ...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.promises.writeFile(path, ...args)
     }
 
     memfs.mkdirpSync(dirname(path))
-    // @ts-ignore
+    // @ts-expect-error
     return memfs.promises.writeFile(path, ...args)
   }
 
   const origOpen = ufs.open
   ufs.open = (path, ...args) => {
     if (!ufs._enabled) {
-      // @ts-ignore
+      // @ts-expect-error
       return realFs.open(path, ...args)
     }
 
     if (args[0].includes('w')) {
       memfs.mkdirpSync(dirname(path))
-      // @ts-ignore
+      // @ts-expect-error
       return memfs.open(path, ...args)
-    } else {
-      // @ts-ignore
+    }
+    else {
+      // @ts-expect-error
       return origOpen(path, ...args)
     }
   }
@@ -418,15 +420,14 @@ export function createMockedFileSystem (): any {
   return ufs
 }
 
-function patchFs (ufs): () => void {
+function patchFs(ufs): () => void {
   // Monkey patch
   const unpatch = patch(ufs)
 
   // Patch <method>.native()
   for (const key in realFs) {
-    if (realFs[key]?.native && !fs[key].native) {
+    if (realFs[key]?.native && !fs[key].native)
       fs[key].native = (...args) => ufs[key].bind(ufs)(...args)
-    }
   }
 
   return () => {
@@ -434,28 +435,27 @@ function patchFs (ufs): () => void {
   }
 }
 
-function createFSWatcherProxy (watchers: fs.FSWatcher[]) {
+function createFSWatcherProxy(watchers: fs.FSWatcher[]) {
   return new Proxy(
     {},
     {
-      get (_obj, property) {
+      get(_obj, property) {
         const funcCallers: Array<[fs.FSWatcher, Function]> = []
         let prop: Function | undefined
         for (const watcher of watchers) {
           prop = watcher[property]
           // if we're a function we wrap it in a bigger caller
-          if (typeof prop === 'function') {
+          if (typeof prop === 'function')
             funcCallers.push([watcher, prop])
-          }
         }
 
         if (funcCallers.length) {
           return (...args) => {
-            for (const [watcher, func] of funcCallers) {
+            for (const [watcher, func] of funcCallers)
               func.apply(watcher, args)
-            }
           }
-        } else {
+        }
+        else {
           return prop
         }
       },
@@ -463,18 +463,19 @@ function createFSWatcherProxy (watchers: fs.FSWatcher[]) {
   )
 }
 
-function getPathFromReaddirEntry (readdirEntry: ReaddirEntry): string {
-  if (readdirEntry instanceof Buffer || typeof readdirEntry === 'string') {
+function getPathFromReaddirEntry(readdirEntry: ReaddirEntry): string {
+  if (readdirEntry instanceof Buffer || typeof readdirEntry === 'string')
     return String(readdirEntry)
-  }
+
   return readdirEntry.name
 }
 
-function getSortedArrayFromReaddirResult (readdirResult: Map<string, ReaddirEntry>): ReaddirEntry[] {
+function getSortedArrayFromReaddirResult(readdirResult: Map<string, ReaddirEntry>): ReaddirEntry[] {
   const array: ReaddirEntry[] = []
   for (const key of Array.from(readdirResult.keys()).sort()) {
     const value = readdirResult.get(key)
-    if (value !== undefined) array.push(value)
+    if (value !== undefined)
+      array.push(value)
   }
   return array
 }

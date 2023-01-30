@@ -39,7 +39,7 @@ export default defineComponent({
     },
   },
 
-  setup (props) {
+  setup(props) {
     return {
       colors: computed(() => {
         const color = props.color as keyof typeof colors

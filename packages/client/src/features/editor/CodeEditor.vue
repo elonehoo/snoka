@@ -16,7 +16,8 @@ const el = ref<HTMLDivElement>()
 let editor: monaco.editor.IEditor
 
 onMounted(() => {
-  if (!el.value) return
+  if (!el.value)
+    return
   editor = monaco.editor.create(el.value, {
     readOnly: true,
     lineNumbers: 'off',
@@ -32,10 +33,9 @@ watch(() => [props.code], () => {
   updateEditorModel()
 })
 
-function updateEditorModel () {
-  if (editor) {
+function updateEditorModel() {
+  if (editor)
     editor.setModel(monaco.editor.createModel(props.code, props.code.trim().startsWith('<') ? 'html' : 'javascript'))
-  }
 }
 
 /* Theme */
@@ -46,10 +46,11 @@ watch(() => settings.value?.darkMode, () => {
   updateEditorTheme()
 })
 
-function updateEditorTheme () {
-  if (!editor) return
+function updateEditorTheme() {
+  if (!editor)
+    return
   editor.updateOptions({
-    // @ts-ignore
+    // @ts-expect-error
     theme: settings.value?.darkMode ? 'snoka-dark' : 'snoka-light',
   })
 }
@@ -57,9 +58,8 @@ function updateEditorTheme () {
 /* Resize */
 
 onResize(el, () => {
-  if (editor) {
+  if (editor)
     editor.layout()
-  }
 })
 </script>
 

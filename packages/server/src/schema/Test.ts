@@ -3,13 +3,15 @@ import { withFilter } from 'graphql-subscriptions'
 import { enumType, extendType, idArg, nonNull, objectType, stringArg } from 'nexus'
 import slugify from 'slugify'
 import AnsiUpPackage from 'ansi_up'
-import { TestFlag } from '@snoka/runner'
+import type { TestFlag } from '@snoka/runner'
 import type { Context } from '../context'
-import { getRunId } from './Run.js'
-import { Status, StatusEnum } from './Status.js'
-import { getTestSuite, TestSuiteData } from './TestSuite.js'
-import { SnapshotData } from './Snapshot.js'
 import { getSrcFile } from '../util.js'
+import { getRunId } from './Run.js'
+import type { StatusEnum } from './Status.js'
+import { Status } from './Status.js'
+import type { TestSuiteData } from './TestSuite.js'
+import { getTestSuite } from './TestSuite.js'
+import type { SnapshotData } from './Snapshot.js'
 import { publishRunStatsUpdated } from './Stats.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -27,7 +29,7 @@ export const Test = objectType({
     module: getSrcFile(__filename),
     export: 'TestData',
   },
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
     t.nonNull.string('slug')
     t.nonNull.string('title')
@@ -74,7 +76,7 @@ export const Test = objectType({
 
 export const TestError = objectType({
   name: 'TestError',
-  definition (t) {
+  definition(t) {
     t.nonNull.string('message', {
       resolve: (error: any) => ansiUp.ansi_to_html(error.message),
     })
@@ -91,7 +93,7 @@ export const TestError = objectType({
 
 export const TestLog = objectType({
   name: 'TestLog',
-  definition (t) {
+  definition(t) {
     t.nonNull.field('type', {
       type: enumType({
         name: 'TestLogType',
@@ -107,7 +109,7 @@ export const TestLog = objectType({
 
 export const TestExtendTestSuite = extendType({
   type: 'TestSuite',
-  definition (t) {
+  definition(t) {
     t.field('testById', {
       type: Test,
       args: {
@@ -140,7 +142,7 @@ export interface TestUpdatedPayload {
 
 export const TestSupbscriptions = extendType({
   type: 'Subscription',
-  definition (t) {
+  definition(t) {
     t.nonNull.field('testAdded', {
       type: Test,
       args: {
@@ -149,8 +151,8 @@ export const TestSupbscriptions = extendType({
       },
       subscribe: withFilter(
         (_, args, ctx) => ctx.pubsub.asyncIterator(TestAdded),
-        (payload: TestAddedPayload, args) => payload.test.runId === getRunId(args.runId) &&
-          (!args.runTestFileId || payload.test.testSuite.runTestFile.id === args.runTestFileId),
+        (payload: TestAddedPayload, args) => payload.test.runId === getRunId(args.runId)
+          && (!args.runTestFileId || payload.test.testSuite.runTestFile.id === args.runTestFileId),
       ),
       resolve: (payload: TestAddedPayload) => payload.test,
     })
@@ -163,8 +165,8 @@ export const TestSupbscriptions = extendType({
       },
       subscribe: withFilter(
         (_, args, ctx) => ctx.pubsub.asyncIterator(TestUpdated),
-        (payload: TestAddedPayload, args) => payload.test.runId === getRunId(args.runId) &&
-          (!args.runTestFileId || payload.test.testSuite.runTestFile.id === args.runTestFileId),
+        (payload: TestAddedPayload, args) => payload.test.runId === getRunId(args.runId)
+          && (!args.runTestFileId || payload.test.testSuite.runTestFile.id === args.runTestFileId),
       ),
       resolve: (payload: TestUpdatedPayload) => payload.test,
     })
@@ -177,8 +179,8 @@ export const TestSupbscriptions = extendType({
       },
       subscribe: withFilter(
         (_, args, ctx) => ctx.pubsub.asyncIterator(TestUpdated),
-        (payload: TestAddedPayload, args) => payload.test.runId === getRunId(args.runId) &&
-          payload.test.slug === args.testSlug,
+        (payload: TestAddedPayload, args) => payload.test.runId === getRunId(args.runId)
+          && payload.test.slug === args.testSlug,
       ),
       resolve: (payload: TestUpdatedPayload) => payload.test,
     })
@@ -227,7 +229,7 @@ export interface CreateTestOptions {
 
 export let tests: TestData[] = []
 
-export async function createTest (ctx: Context, options: CreateTestOptions) {
+export async function createTest(ctx: Context, options: CreateTestOptions) {
   const test: TestData = {
     id: options.id,
     slug: slugify(options.title),
@@ -252,24 +254,25 @@ export async function createTest (ctx: Context, options: CreateTestOptions) {
   return test
 }
 
-export function getTest (ctx: Context, testSuiteId: string, id: string): TestData {
+export function getTest(ctx: Context, testSuiteId: string, id: string): TestData {
   const testSuite = getTestSuite(ctx, testSuiteId)
   const test = testSuite.children.find(t => t.id === id) as TestData
-  if (!test) {
+  if (!test)
     throw new Error(`Test ${id} not found`)
-  }
+
   return test
 }
 
 type UpdateTestPayload = Partial<Omit<TestData, 'id' | 'runId' | 'testSuiteId'>>
 
-export async function updateTest (ctx: Context, testSuiteId: string, id: string, data: UpdateTestPayload | ((currentData: TestData) => UpdateTestPayload)) {
+export async function updateTest(ctx: Context, testSuiteId: string, id: string, data: UpdateTestPayload | ((currentData: TestData) => UpdateTestPayload)) {
   const test = getTest(ctx, testSuiteId, id)
-  if (!test) return
+  if (!test)
+    return
   const newData = typeof data === 'function' ? data(test) : data
-  if (test.status !== newData.status) {
+  if (test.status !== newData.status)
     publishRunStatsUpdated(ctx, test.runId)
-  }
+
   Object.assign(test, newData)
   ctx.pubsub.publish(TestUpdated, {
     test,
@@ -277,6 +280,6 @@ export async function updateTest (ctx: Context, testSuiteId: string, id: string,
   return test
 }
 
-export function clearTests (ctx: Context, runId: string = null) {
+export function clearTests(ctx: Context, runId: string = null) {
   tests = runId ? tests.filter(t => t.runId !== runId) : []
 }

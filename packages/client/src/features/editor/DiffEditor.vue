@@ -21,7 +21,8 @@ const el = ref<HTMLDivElement>()
 let editor: monaco.editor.IStandaloneDiffEditor
 
 onMounted(() => {
-  if (!el.value) return
+  if (!el.value)
+    return
   editor = monaco.editor.createDiffEditor(el.value, {
     readOnly: true,
     lineNumbers: 'off',
@@ -37,7 +38,7 @@ watch(() => [props.expected, props.actual], () => {
   updateEditorModel()
 })
 
-function updateEditorModel () {
+function updateEditorModel() {
   if (editor) {
     editor.setModel({
       original: monaco.editor.createModel(props.expected, props.expected.trim().startsWith('<') ? 'html' : 'javascript'),
@@ -54,10 +55,11 @@ watch(() => settings.value?.darkMode, () => {
   updateEditorTheme()
 })
 
-function updateEditorTheme () {
-  if (!editor) return
+function updateEditorTheme() {
+  if (!editor)
+    return
   editor.updateOptions({
-    // @ts-ignore
+    // @ts-expect-error
     theme: settings.value?.darkMode ? 'snoka-dark' : 'snoka-light',
   })
 }
@@ -65,9 +67,8 @@ function updateEditorTheme () {
 /* Resize */
 
 onResize(el, () => {
-  if (editor) {
+  if (editor)
     editor.layout()
-  }
 })
 </script>
 

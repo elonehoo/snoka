@@ -1,16 +1,18 @@
 import type { SnokaGlobalContext } from './index.js'
 
-export function createRetry (ctx: SnokaGlobalContext) {
+export function createRetry(ctx: SnokaGlobalContext) {
   const retry = (handler: () => unknown, tries = 10, delay = 1) => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<void>(async (resolve, reject) => {
       try {
         await handler()
         resolve()
-      } catch (e) {
+      }
+      catch (e) {
         if (tries === 1) {
           reject(e)
-        } else {
+        }
+        else {
           setTimeout(() => {
             retry(handler, tries - 1, delay).then(resolve).catch(reject)
           }, delay)

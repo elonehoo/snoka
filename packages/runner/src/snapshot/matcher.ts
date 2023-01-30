@@ -2,14 +2,14 @@
 
 import type { ExpectationResult } from 'expect/build/types'
 import type { Plugin } from 'pretty-format'
+import { basename } from 'pathe'
 import type { Context, Test } from '../types.js'
+import { currentTest } from '../runtime/global-context.js'
 import type { Snapshot } from './types.js'
 import { readSnapshots } from './read.js'
 import { format } from './format.js'
-import { currentTest } from '../runtime/global-context.js'
 import { generateSnapshotId, generateSnapshotTitle } from './util.js'
 import { writeSnapshots } from './write.js'
-import { basename } from 'pathe'
 
 export class SnapshotMatcher {
   ctx: Context
@@ -23,7 +23,7 @@ export class SnapshotMatcher {
   plugins: Plugin[] = [] // @TODO serializer plugins
   titleMap: Record<string, number>
 
-  async start (ctx: Context) {
+  async start(ctx: Context) {
     this.ctx = ctx
     this.existingSnapshots = await readSnapshots(this.ctx.options.entry)
     this.titleMap = {}
@@ -33,19 +33,18 @@ export class SnapshotMatcher {
     this.processedSnapshots = []
   }
 
-  toMatchSnapshot (received: any, propertiesMatchers: any, hint?: string): ExpectationResult {
-    if (!currentTest) {
-      throw new Error(`toMatchSnapshot can't be called outside of a test`)
-    }
+  toMatchSnapshot(received: any, propertiesMatchers: any, hint?: string): ExpectationResult {
+    if (!currentTest)
+      throw new Error('toMatchSnapshot can\'t be called outside of a test')
 
-    if (typeof propertiesMatchers !== 'object') {
+    if (typeof propertiesMatchers !== 'object')
       hint = propertiesMatchers
-    }
 
     if (this.currentTest !== currentTest) {
       this.currentTest = currentTest
       this.currentIndex = 1
-    } else {
+    }
+    else {
       this.currentIndex++
     }
 
@@ -74,10 +73,12 @@ export class SnapshotMatcher {
 
         this.failedSnapshots.push(existingSnapshot)
         currentTest.failedSnapshots++
-      } else {
+      }
+      else {
         this.passedSnapshots.push(existingSnapshot)
       }
-    } else {
+    }
+    else {
       this.newSnapshots.push(processedSnapshot = {
         id: generateSnapshotId(testFile, snapshotTitle),
         title: snapshotTitle,
@@ -94,7 +95,7 @@ export class SnapshotMatcher {
     }
   }
 
-  async end (updateSnapshots: boolean) {
+  async end(updateSnapshots: boolean) {
     await writeSnapshots(this.ctx.options.entry, this.processedSnapshots, updateSnapshots)
 
     return {

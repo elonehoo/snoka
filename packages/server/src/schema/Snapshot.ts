@@ -1,10 +1,11 @@
 import { fileURLToPath } from 'url'
 import { arg, extendType, idArg, inputObjectType, nonNull, objectType } from 'nexus'
-import { readSnapshots, Snapshot as RunnerSnapshot, writeSnapshots } from '@snoka/runner'
+import type { Snapshot as RunnerSnapshot } from '@snoka/runner'
+import { readSnapshots, writeSnapshots } from '@snoka/runner'
 import type { Context } from '../context.js'
-import { TestData } from './Test.js'
 import { getErrorPosition, getSrcFile } from '../util.js'
-import { TestFileData } from './TestFile.js'
+import type { TestData } from './Test.js'
+import type { TestFileData } from './TestFile.js'
 import { runs } from './Run.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -15,7 +16,7 @@ export const Snapshot = objectType({
     module: getSrcFile(__filename),
     export: 'SnapshotData',
   },
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
     t.nonNull.string('title')
     t.nonNull.string('content')
@@ -35,20 +36,20 @@ export const Snapshot = objectType({
 
 export const SnapshotExtendTest = extendType({
   type: 'Test',
-  definition (t) {
+  definition(t) {
     t.nonNull.list.nonNull.field('snapshots', {
       type: Snapshot,
     })
     t.nonNull.int('failedSnapshotCount')
     t.nonNull.int('snapshotCount', {
-      resolve: (test) => test.snapshots.length,
+      resolve: test => test.snapshots.length,
     })
   },
 })
 
 export const SnapshotExtendRun = extendType({
   type: 'Run',
-  definition (t) {
+  definition(t) {
     t.nonNull.list.nonNull.field('failedSnapshots', {
       type: Snapshot,
     })
@@ -69,9 +70,9 @@ export const SnapshotExtendRun = extendType({
       args: {
         id: nonNull(idArg()),
       },
-      resolve: (run, { id }) => run.passedSnapshots.find(s => s.id === id) ??
-        run.failedSnapshots.find(s => s.id === id) ??
-        run.newSnapshots.find(s => s.id === id),
+      resolve: (run, { id }) => run.passedSnapshots.find(s => s.id === id)
+        ?? run.failedSnapshots.find(s => s.id === id)
+        ?? run.newSnapshots.find(s => s.id === id),
     })
     t.field('nextSnapshot', {
       type: Snapshot,
@@ -81,9 +82,9 @@ export const SnapshotExtendRun = extendType({
       resolve: (run, { id }) => {
         const snapshots = run.passedSnapshots.concat(run.failedSnapshots, run.newSnapshots)
         let index = snapshots.findIndex(s => s.id === id) + 1
-        if (index >= snapshots.length) {
+        if (index >= snapshots.length)
           index = 0
-        }
+
         return snapshots[index]
       },
     })
@@ -95,9 +96,9 @@ export const SnapshotExtendRun = extendType({
       resolve: (run, { id }) => {
         const snapshots = run.passedSnapshots.concat(run.failedSnapshots, run.newSnapshots)
         let index = snapshots.findIndex(s => s.id === id) - 1
-        if (index < 0) {
+        if (index < 0)
           index = snapshots.length - 1
-        }
+
         return snapshots[index]
       },
     })
@@ -106,7 +107,7 @@ export const SnapshotExtendRun = extendType({
 
 export const SnapshotMutation = extendType({
   type: 'Mutation',
-  definition (t) {
+  definition(t) {
     t.field('updateSnapshot', {
       type: Snapshot,
       args: {
@@ -122,12 +123,11 @@ export const SnapshotMutation = extendType({
 
         const run = runs[runs.length - 1]
         const index = run.failedSnapshots.indexOf(snapshot)
-        if (index !== -1) {
+        if (index !== -1)
           run.failedSnapshots.splice(index, 1)
-        }
-        if (!run.passedSnapshots.includes(snapshot)) {
+
+        if (!run.passedSnapshots.includes(snapshot))
           run.passedSnapshots.push(snapshot)
-        }
 
         return snapshot
       },
@@ -137,7 +137,7 @@ export const SnapshotMutation = extendType({
 
 export const UpdateSnapshotInput = inputObjectType({
   name: 'UpdateSnapshotInput',
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
   },
 })
@@ -156,19 +156,19 @@ export interface SnapshotData {
 
 let snapshots: SnapshotData[] = []
 
-export function getSnapshot (id: string): SnapshotData {
+export function getSnapshot(id: string): SnapshotData {
   return snapshots.find(s => s.id === id)
 }
 
-export function clearSnapshots () {
+export function clearSnapshots() {
   snapshots = []
 }
 
-export function addSnapshots (s: SnapshotData[]) {
+export function addSnapshots(s: SnapshotData[]) {
   snapshots.push(...s)
 }
 
-export async function updateSnapshot (ctx: Context, snapshot: SnapshotData) {
+export async function updateSnapshot(ctx: Context, snapshot: SnapshotData) {
   const snapshots = await readSnapshots(snapshot.testFile)
   const existingSnapshot = snapshots.find(s => s.id === snapshot.id)
   Object.assign(existingSnapshot, {
@@ -177,7 +177,7 @@ export async function updateSnapshot (ctx: Context, snapshot: SnapshotData) {
   await writeSnapshots(snapshot.testFile, snapshots, true)
 }
 
-export function toSnapshotData (s: RunnerSnapshot, test: TestData, testFile: TestFileData): SnapshotData {
+export function toSnapshotData(s: RunnerSnapshot, test: TestData, testFile: TestFileData): SnapshotData {
   const result: SnapshotData = {
     ...s,
     test,

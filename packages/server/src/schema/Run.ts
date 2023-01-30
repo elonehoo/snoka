@@ -1,23 +1,27 @@
-import { relative } from 'pathe'
-import fs from 'fs-extra'
 import { fileURLToPath } from 'url'
 import { performance } from 'perf_hooks'
+import { relative } from 'pathe'
+import fs from 'fs-extra'
 import { arg, extendType, idArg, inputObjectType, nonNull, objectType } from 'nexus'
 import { nanoid } from 'nanoid'
-import { setupRunner, getStats, Runner } from '@snoka/runner'
+import type { Runner } from '@snoka/runner'
+import { getStats, setupRunner } from '@snoka/runner'
 import randomEmoji from '@sefinek/random-emoji'
 import objectInspect from 'object-inspect'
-import type { Context } from '../context'
-import { Status, StatusEnum } from './Status.js'
-import { updateTestFile, testFiles } from './TestFile.js'
-import { clearTestSuites, createTestSuite, updateTestSuite, testSuites } from './TestSuite.js'
-import { clearTests, updateTest } from './Test.js'
-import { RunTestFileData, updateRunTestFile } from './RunTestFile.js'
-import { getErrorPosition, getSrcFile, formatRunTestFileErrorMessage } from '../util.js'
-import { settings } from './Settings.js'
-import { mightRunOnChangedFiles } from '../watch.js'
 import { toProgramConfig } from '@snoka/config'
-import { addSnapshots, clearSnapshots, getSnapshot, SnapshotData, toSnapshotData } from './Snapshot.js'
+import type { Context } from '../context'
+import { formatRunTestFileErrorMessage, getErrorPosition, getSrcFile } from '../util.js'
+import { mightRunOnChangedFiles } from '../watch.js'
+import type { StatusEnum } from './Status.js'
+import { Status } from './Status.js'
+import { testFiles, updateTestFile } from './TestFile.js'
+import { clearTestSuites, createTestSuite, testSuites, updateTestSuite } from './TestSuite.js'
+import { clearTests, updateTest } from './Test.js'
+import type { RunTestFileData } from './RunTestFile.js'
+import { updateRunTestFile } from './RunTestFile.js'
+import { settings } from './Settings.js'
+import type { SnapshotData } from './Snapshot.js'
+import { addSnapshots, clearSnapshots, getSnapshot, toSnapshotData } from './Snapshot.js'
 
 const __filename = fileURLToPath(import.meta.url)
 
@@ -29,7 +33,7 @@ export const Run = objectType({
     module: getSrcFile(__filename),
     export: 'RunData',
   },
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
     t.nonNull.string('date')
     t.nonNull.string('emoji')
@@ -43,7 +47,7 @@ export const Run = objectType({
 
 export const RunQuery = extendType({
   type: 'Query',
-  definition (t) {
+  definition(t) {
     t.nonNull.list.field('runs', {
       type: nonNull(Run),
       resolve: () => runs,
@@ -66,7 +70,7 @@ export const RunQuery = extendType({
 
 export const RunMutation = extendType({
   type: 'Mutation',
-  definition (t) {
+  definition(t) {
     t.nonNull.field('startRun', {
       type: Run,
       args: {
@@ -102,14 +106,14 @@ export const RunMutation = extendType({
 
 export const StartRunInput = inputObjectType({
   name: 'StartRunInput',
-  definition (t) {
+  definition(t) {
     t.list.nonNull.string('testFileIds')
   },
 })
 
 export const ClearRunInput = inputObjectType({
   name: 'ClearRunInput',
-  definition (t) {
+  definition(t) {
     t.nonNull.id('id')
   },
 })
@@ -135,7 +139,7 @@ interface RunRemovedPayload {
 export const RunSubscription = extendType({
   type: 'Subscription',
 
-  definition (t) {
+  definition(t) {
     t.field('runAdded', {
       type: nonNull(Run),
       subscribe: (_, args, ctx) => ctx.pubsub.asyncIterator(RunAdded),
@@ -176,7 +180,7 @@ export interface CreateRunOptions {
   testFileIds: string[]
 }
 
-export async function createRun (ctx: Context, options: CreateRunOptions) {
+export async function createRun(ctx: Context, options: CreateRunOptions) {
   const runId = nanoid()
 
   const testFilesRaw = options.testFileIds ? testFiles.filter(f => options.testFileIds.includes(f.id)) : [...testFiles]
@@ -214,9 +218,8 @@ export async function createRun (ctx: Context, options: CreateRunOptions) {
   }
   runs.push(run)
 
-  if (runs.length > MAX_RUNS) {
+  if (runs.length > MAX_RUNS)
     runs.shift()
-  }
 
   ctx.pubsub.publish(RunAdded, {
     run,
@@ -225,20 +228,19 @@ export async function createRun (ctx: Context, options: CreateRunOptions) {
   return run
 }
 
-export async function getRun (ctx: Context, id: string) {
+export async function getRun(ctx: Context, id: string) {
   const run = (id === 'last-run') ? runs[runs.length - 1] : runs.find(r => r.id === id)
-  if (run) {
+  if (run)
     return run
-  } else {
+  else
     throw new Error(`Run ${id} not found`)
-  }
 }
 
-export function getRunId (id: string) {
+export function getRunId(id: string) {
   return ((id === 'last-run') ? runs[runs.length - 1] : runs.find(r => r.id === id))?.id
 }
 
-export async function updateRun (ctx: Context, id: string, data: Partial<Omit<RunData, 'id'>>) {
+export async function updateRun(ctx: Context, id: string, data: Partial<Omit<RunData, 'id'>>) {
   const run = await getRun(ctx, id)
   Object.assign(run, data)
   ctx.pubsub.publish(RunUpdated, {
@@ -249,10 +251,10 @@ export async function updateRun (ctx: Context, id: string, data: Partial<Omit<Ru
 
 let runner: Runner
 
-export async function startRun (ctx: Context, id: string) {
+export async function startRun(ctx: Context, id: string) {
   const run = await getRun(ctx, id)
 
-  await Promise.all(run.runTestFiles.map(async f => {
+  await Promise.all(run.runTestFiles.map(async (f) => {
     updateTestFile(ctx, f.testFile.id, { status: 'in_progress' })
     updateRunTestFile(ctx, run.id, f.id, { status: 'in_progress' })
   }))
@@ -265,7 +267,8 @@ export async function startRun (ctx: Context, id: string) {
       config: toProgramConfig(ctx.config),
       reporters: [],
     })
-  } else {
+  }
+  else {
     runner.clearOnMessage()
   }
   runner.onMessage(async (message) => {
@@ -287,7 +290,8 @@ export async function startRun (ctx: Context, id: string) {
           parent: null,
         })
       }
-    } else if (message.method === 'onSuiteComplete') {
+    }
+    else if (message.method === 'onSuiteComplete') {
       const [suiteData, duration, completedTests] = message.args
       const suite = testSuites.find(s => s.id === suiteData.id)
       await Promise.all(suite.children.filter(child => !('children' in child) && completedTests[child.id]).map(child => updateTest(ctx, suite.id, child.id, {
@@ -298,7 +302,8 @@ export async function startRun (ctx: Context, id: string) {
         status: !suite.children.length ? 'skipped' : suiteData.testErrors + suiteData.otherErrors.length ? 'error' : 'success',
         duration,
       })
-    } else if (message.method === 'onTestError') {
+    }
+    else if (message.method === 'onTestError') {
       const [suiteId, testId, duration, error] = message.args
       const testFile = testSuites.find(s => s.id === suiteId).runTestFile.testFile
       const { line, col } = getErrorPosition(testFile.relativePath, error.stack)
@@ -316,7 +321,8 @@ export async function startRun (ctx: Context, id: string) {
           actual: error.matcherResult?.actual ? stringifyJS(error.matcherResult.actual) : null,
         },
       })
-    } else if (message.method === 'onLog') {
+    }
+    else if (message.method === 'onLog') {
       const [suiteId, testId, type, text] = message.args
       if (testId) {
         await updateTest(ctx, suiteId, testId, (test) => {
@@ -329,10 +335,12 @@ export async function startRun (ctx: Context, id: string) {
             logs,
           }
         })
-      } else {
+      }
+      else {
         process[type].write(text)
       }
-    } else if (message.method === 'onTestSnapshotsProcessed') {
+    }
+    else if (message.method === 'onTestSnapshotsProcessed') {
       const [suiteId, testId, snapshots] = message.args
       const testFile = testSuites.find(s => s.id === suiteId).runTestFile.testFile
       await updateTest(ctx, suiteId, testId, (test) => {
@@ -344,7 +352,8 @@ export async function startRun (ctx: Context, id: string) {
           failedSnapshotCount: test.failedSnapshotCount + snapshots.filter(s => !!s.newContent).length,
         }
       })
-    } else if (message.method === 'onTestEnvResult') {
+    }
+    else if (message.method === 'onTestEnvResult') {
       const [suiteId, testId, envResult] = message.args
       await updateTest(ctx, suiteId, testId, {
         envResult,
@@ -355,14 +364,14 @@ export async function startRun (ctx: Context, id: string) {
   try {
     let completed = 0
 
-    const results = await Promise.all(run.runTestFiles.map(async f => {
+    const results = await Promise.all(run.runTestFiles.map(async (f) => {
       try {
         const result = await runner.runTestFile(f.testFile.relativePath, f.testFile.deps)
         const stats = getStats([result])
         let status: StatusEnum = !stats.testCount ? 'skipped' : stats.errorTestCount > 0 ? 'error' : 'success'
-        if (!stats.testCount && result.suites.some(s => hasTodo(s))) {
+        if (!stats.testCount && result.suites.some(s => hasTodo(s)))
           status = 'todo'
-        }
+
         await updateTestFile(ctx, f.testFile.id, {
           status,
           duration: result.duration,
@@ -378,7 +387,8 @@ export async function startRun (ctx: Context, id: string) {
           progress: completed / run.runTestFiles.length,
         })
         return result
-      } catch (e) {
+      }
+      catch (e) {
         e.message = formatRunTestFileErrorMessage(e, f)
         await updateTestFile(ctx, f.testFile.id, {
           status: 'error',
@@ -402,10 +412,10 @@ export async function startRun (ctx: Context, id: string) {
       newSnapshots: stats.newSnapshots.map(s => getSnapshot(s.id)),
     })
 
-    if (settings.watch) {
+    if (settings.watch)
       mightRunOnChangedFiles(ctx)
-    }
-  } catch (e) {
+  }
+  catch (e) {
     await updateRun(ctx, run.id, {
       status: 'error',
     })
@@ -414,15 +424,15 @@ export async function startRun (ctx: Context, id: string) {
   return run
 }
 
-export async function clearRun (ctx: Context, id: string) {
+export async function clearRun(ctx: Context, id: string) {
   const run = await getRun(ctx, id)
-  if (run.status === 'in_progress') {
+  if (run.status === 'in_progress')
     throw new Error(`Run ${id} is in progress and can't be cleared`)
-  }
+
   const index = runs.indexOf(run)
-  if (index !== -1) {
+  if (index !== -1)
     runs.splice(index, 1)
-  }
+
   clearTestSuites(ctx, id)
   clearTests(ctx, id)
   ctx.pubsub.publish(RunRemoved, {
@@ -431,7 +441,7 @@ export async function clearRun (ctx: Context, id: string) {
   return run
 }
 
-export function clearRuns (ctx: Context) {
+export function clearRuns(ctx: Context) {
   clearTestSuites(ctx)
   clearTests(ctx)
   clearSnapshots()
@@ -439,19 +449,21 @@ export function clearRuns (ctx: Context) {
   return true
 }
 
-export function isRunning () {
+export function isRunning() {
   return runs[runs.length - 1]?.status === 'in_progress'
 }
 
-function stringifyJS (object: any) {
+function stringifyJS(object: any) {
   return objectInspect(object, {
     depth: 32,
     indent: 2,
   })
 }
 
-function hasTodo (child: any) {
-  if (child.flag === 'todo') return true
-  if ('children' in child && child.children.some(c => hasTodo(c[1]))) return true
+function hasTodo(child: any) {
+  if (child.flag === 'todo')
+    return true
+  if ('children' in child && child.children.some(c => hasTodo(c[1])))
+    return true
   return false
 }

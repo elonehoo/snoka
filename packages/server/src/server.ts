@@ -1,12 +1,12 @@
-import { dirname, join } from 'pathe'
 import HTTP from 'http'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
+import { dirname, join } from 'pathe'
 import { ApolloServer } from 'apollo-server-express'
 import {
   ApolloServerPluginDrainHttpServer,
-  ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginInlineTrace,
+  ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core'
 import express from 'express'
 import historyFallback from 'express-history-api-fallback'
@@ -29,7 +29,7 @@ export interface CreateServerOptions {
   vitePort: number
 }
 
-export async function createServer (options: CreateServerOptions) {
+export async function createServer(options: CreateServerOptions) {
   // Config
   const configLoader = await setupConfigLoader()
   const config = await configLoader.loadConfig()
@@ -41,7 +41,7 @@ export async function createServer (options: CreateServerOptions) {
     root: config.targetDirectory,
     server: {
       hmr: {
-        host: `localhost`,
+        host: 'localhost',
         port: options.vitePort,
       },
     },
@@ -66,7 +66,7 @@ export async function createServer (options: CreateServerOptions) {
 
   const pubsub = new PubSub()
 
-  function createContext (): Context {
+  function createContext(): Context {
     return {
       config,
       pubsub,
@@ -94,7 +94,7 @@ export async function createServer (options: CreateServerOptions) {
     schema,
     context: createContext,
     cache: 'bounded',
-    formatError (error) {
+    formatError(error) {
       consola.error(error)
       consola.log(JSON.stringify(error, null, 2))
       return error
@@ -102,9 +102,9 @@ export async function createServer (options: CreateServerOptions) {
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer: http }),
       {
-        async serverWillStart () {
+        async serverWillStart() {
           return {
-            async drainServer () {
+            async drainServer() {
               await wsCleanup.dispose()
             },
           }

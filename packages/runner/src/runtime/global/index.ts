@@ -5,7 +5,7 @@ export interface SnokaGlobalContext {
   filename: string
 }
 
-export function createSnokaGlobal (ctx: SnokaGlobalContext) {
+export function createSnokaGlobal(ctx: SnokaGlobalContext) {
   return {
     retry: createRetry(ctx),
     mockModule: createMockModule(ctx),

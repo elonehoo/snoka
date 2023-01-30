@@ -7,7 +7,7 @@ import { isRunning, settings, testFiles } from './schema/index.js'
 let changedFiles: string[] = []
 let timer
 
-export async function setupRunWatch (ctx: Context) {
+export async function setupRunWatch(ctx: Context) {
   const watchBase = ctx.config.watchBaseDirectory ?? ctx.config.targetDirectory
   const watcher = chokidar.watch(ctx.config.watchMatch, {
     cwd: watchBase,
@@ -17,11 +17,12 @@ export async function setupRunWatch (ctx: Context) {
     ignoreInitial: true,
   })
 
-  function onChange (relativePath: string) {
+  function onChange(relativePath: string) {
     const path = join(watchBase, relativePath)
     if (settings.watch) {
       changedFiles.push(path)
-      if (timer) clearTimeout(timer)
+      if (timer)
+        clearTimeout(timer)
       if (!isRunning()) {
         timer = setTimeout(() => {
           mightRunOnChangedFiles(ctx)
@@ -34,7 +35,7 @@ export async function setupRunWatch (ctx: Context) {
   watcher.on('add', onChange)
 }
 
-export function mightRunOnChangedFiles (ctx: Context) {
+export function mightRunOnChangedFiles(ctx: Context) {
   const files = getTestFilesWithChangedModules(ctx, changedFiles)
   changedFiles = []
   if (files.length) {
@@ -44,6 +45,6 @@ export function mightRunOnChangedFiles (ctx: Context) {
   }
 }
 
-export function getTestFilesWithChangedModules (ctx: Context, files: string[]) {
+export function getTestFilesWithChangedModules(ctx: Context, files: string[]) {
   return testFiles.filter(f => !f.deleted && (files.includes(f.absolutePath) || f.deps.some(m => files.includes(m))))
 }

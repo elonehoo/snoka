@@ -8,8 +8,8 @@
   "keywords": [],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./*": "./*"
   },
@@ -22,6 +22,14 @@
   "scripts": {
     "build": "rimraf dist && tsc -d && chmod +x ./dist/bin.js",
     "watch": "tsc -d -w --sourceMap"
+  },
+  "peerDependencies": {
+    "@snoka/server": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@snoka/server": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@antfu/install-pkg": "^0.1.1",
@@ -36,14 +44,6 @@
     "portfinder": "^1.0.32",
     "sade": "^1.8.1",
     "typescript": "^4.9.4"
-  },
-  "peerDependencies": {
-    "@snoka/server": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "@snoka/server": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@types/lodash": "^4.14.191",

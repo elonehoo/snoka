@@ -1,7 +1,7 @@
 import { MessageChannel } from 'worker_threads'
 import type { FetchResult, ViteNodeResolveId } from 'vite-node'
-import { TestFlag } from './types.js'
-import { Snapshot } from './snapshot/types.js'
+import type { TestFlag } from './types.js'
+import type { Snapshot } from './snapshot/types.js'
 
 export interface WorkerRemoteMethods {
   onCollected: (suites: SuiteCollectData[]) => void
@@ -56,7 +56,7 @@ export type WorkerMessage<K extends keyof WorkerRemoteMethods = keyof WorkerRemo
     id: string
     method: K
     args: Parameters<WorkerRemoteMethods[K]>
-  } : never;
+  } : never
 
 export interface MainMessageResult {
   id: string
@@ -72,23 +72,24 @@ export type MainMessage = MainMessageResult | MainMessageError
 
 export type WorkerMessageHandler = (message: WorkerMessage) => unknown
 
-export function useWorkerMessages () {
+export function useWorkerMessages() {
   const eventHandlers: WorkerMessageHandler[] = []
 
-  function onMessage (handler: WorkerMessageHandler) {
+  function onMessage(handler: WorkerMessageHandler) {
     eventHandlers.push(handler)
   }
 
-  function clearOnMessage () {
+  function clearOnMessage() {
     eventHandlers.length = 0
   }
 
-  async function handleMessage (message: WorkerMessage) {
+  async function handleMessage(message: WorkerMessage) {
     for (const handler of eventHandlers) {
       try {
         await handler(message)
-      } catch (e) {
-        console.error(`An error occured while handling message`, message)
+      }
+      catch (e) {
+        console.error('An error occured while handling message', message)
         console.error(e)
       }
     }
@@ -101,7 +102,7 @@ export function useWorkerMessages () {
   }
 }
 
-export function createWorkerChannel (methods: Partial<WorkerRemoteMethods>, handleMessage: (message: WorkerMessage) => unknown) {
+export function createWorkerChannel(methods: Partial<WorkerRemoteMethods>, handleMessage: (message: WorkerMessage) => unknown) {
   const channel = new MessageChannel()
   const mainPort = channel.port2
   const workerPort = channel.port1
@@ -118,7 +119,8 @@ export function createWorkerChannel (methods: Partial<WorkerRemoteMethods>, hand
             result,
           } as MainMessageResult)
         }
-      } catch (e) {
+      }
+      catch (e) {
         mainPort.postMessage({
           id: message.id,
           error: e,

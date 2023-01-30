@@ -1,4 +1,3 @@
-
 <script lang="ts" setup>
 import { useQuery } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
@@ -6,8 +5,6 @@ import { useRoute } from 'vue-router'
 import { computed, onMounted, ref, watch } from 'vue'
 import { TerminalIcon } from '@zhuowenli/vue-feather-icons'
 import TerminalView from '../terminal/TerminalView.vue'
-
-const route = useRoute()
 
 const props = defineProps({
   test: {
@@ -20,6 +17,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const route = useRoute()
 
 const { result, refetch } = useQuery(() => gql`
   query testLogs ($runId: ID!, $suiteId: ID!, $testId: ID!) {

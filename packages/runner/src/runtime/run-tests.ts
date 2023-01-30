@@ -1,17 +1,16 @@
-import { basename } from 'pathe'
 import { performance } from 'perf_hooks'
+import { basename } from 'pathe'
 import sinon from 'sinon'
-import type { Context, TestSuite, Test } from '../types.js'
+import type { Context, Test, TestSuite } from '../types.js'
 import { setCurrentSuite, setCurrentTest } from './global-context.js'
 import { toMainThread } from './message.js'
 
-export async function runTests (ctx: Context, failOnSnapshots: boolean) {
-  for (const suite of ctx.suites) {
+export async function runTests(ctx: Context, failOnSnapshots: boolean) {
+  for (const suite of ctx.suites)
     await runSuite(ctx, suite, failOnSnapshots)
-  }
 }
 
-async function runSuite (ctx: Context, suite: TestSuite, failOnSnapshots: boolean) {
+async function runSuite(ctx: Context, suite: TestSuite, failOnSnapshots: boolean) {
   setCurrentSuite(suite)
 
   toMainThread().onSuiteStart({
@@ -23,9 +22,8 @@ async function runSuite (ctx: Context, suite: TestSuite, failOnSnapshots: boolea
   const suiteTime = performance.now()
 
   if (suite.childrenToRun.length) {
-    for (const handler of suite.beforeAllHandlers) {
+    for (const handler of suite.beforeAllHandlers)
       await handler()
-    }
 
     const allParents = getSuitesFromRootToLeaf(suite)
 
@@ -34,15 +32,15 @@ async function runSuite (ctx: Context, suite: TestSuite, failOnSnapshots: boolea
         const childSuite = child[1]
         await runSuite(ctx, childSuite, failOnSnapshots)
         setCurrentSuite(suite)
-      } else if (child[0] === 'test') {
+      }
+      else if (child[0] === 'test') {
         const test = child[1]
         setCurrentTest(test)
         sinon.restore()
 
         for (const parentSuite of allParents) {
-          for (const handler of parentSuite.beforeEachHandlers) {
+          for (const handler of parentSuite.beforeEachHandlers)
             await handler()
-          }
         }
 
         const time = performance.now()
@@ -59,7 +57,8 @@ async function runSuite (ctx: Context, suite: TestSuite, failOnSnapshots: boolea
 
           test.duration = performance.now() - time
           completedTests[test.id] = test.duration
-        } catch (e) {
+        }
+        catch (e) {
           test.duration = performance.now() - time
           test.error = e
           let stackIndex = e.stack ? e.stack.lastIndexOf(basename(ctx.options.entry)) : -1
@@ -74,39 +73,35 @@ async function runSuite (ctx: Context, suite: TestSuite, failOnSnapshots: boolea
             matcherResult: JSON.stringify(e.matcherResult),
           })
           suite.testErrors++
-        } finally {
+        }
+        finally {
           test.envResult = await ctx.runtimeEnv.getResult()
-          if (test.envResult != null) {
+          if (test.envResult != null)
             toMainThread().onTestEnvResult(suite.id, test.id, test.envResult)
-          }
         }
 
         for (const parentSuite of allParents) {
-          for (const handler of parentSuite.afterEachHandlers) {
+          for (const handler of parentSuite.afterEachHandlers)
             await handler()
-          }
         }
 
-        if (test.snapshots.length) {
+        if (test.snapshots.length)
           toMainThread().onTestSnapshotsProcessed(suite.id, test.id, test.snapshots)
-        }
 
         setCurrentTest(null)
       }
     }
 
-    for (const handler of suite.afterAllHandlers) {
+    for (const handler of suite.afterAllHandlers)
       await handler()
-    }
   }
 
   const ranTestChildren = suite.childrenToRun.filter(child => child[0] === 'test') as ['test', Test][]
   suite.ranTests = ranTestChildren.map(child => child[1])
   suite.duration = performance.now() - suiteTime
 
-  if (ctx.options.config.emptySuiteError && !suite.childrenToRun.length) {
+  if (ctx.options.config.emptySuiteError && !suite.childrenToRun.length)
     suite.otherErrors.push(new Error(`Empty test suite: ${suite.title}`))
-  }
 
   toMainThread().onSuiteComplete({
     id: suite.id,
@@ -117,7 +112,7 @@ async function runSuite (ctx: Context, suite: TestSuite, failOnSnapshots: boolea
   setCurrentSuite(null)
 }
 
-function getSuitesFromRootToLeaf (suite: TestSuite): TestSuite[] {
+function getSuitesFromRootToLeaf(suite: TestSuite): TestSuite[] {
   const suites = suite.parent ? getSuitesFromRootToLeaf(suite.parent) : []
   suites.push(suite)
   return suites

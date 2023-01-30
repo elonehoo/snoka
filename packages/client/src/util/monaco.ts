@@ -6,13 +6,17 @@ import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
 import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error
 window.MonacoEnvironment = {
-  getWorker (_: string, label: string) {
-    if (label === 'typescript' || label === 'javascript') return new TsWorker()
-    if (label === 'json') return new JsonWorker()
-    if (label === 'css') return new CssWorker()
-    if (label === 'html') return new HtmlWorker()
+  getWorker(_: string, label: string) {
+    if (label === 'typescript' || label === 'javascript')
+      return new TsWorker()
+    if (label === 'json')
+      return new JsonWorker()
+    if (label === 'css')
+      return new CssWorker()
+    if (label === 'html')
+      return new HtmlWorker()
     return new EditorWorker()
   },
 }

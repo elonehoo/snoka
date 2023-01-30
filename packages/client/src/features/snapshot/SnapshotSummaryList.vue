@@ -1,4 +1,5 @@
-<script lang="ts" setup>import { NexusGenFieldTypes } from '@snoka/server/types'
+<script lang="ts" setup>
+import type { NexusGenFieldTypes } from '@snoka/server/types'
 import { useQuery } from '@vue/apollo-composable'
 import gql from 'graphql-tag'
 import { computed } from 'vue'
@@ -49,8 +50,8 @@ const { result, subscribeToMore } = useQuery<{
 `, () => ({
   ...route.params.runId !== 'last-run'
     ? {
-      runId: route.params.runId,
-    }
+        runId: route.params.runId,
+      }
     : {},
 }), {
   fetchPolicy: 'cache-and-network',

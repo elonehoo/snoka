@@ -1,4 +1,4 @@
-import { plugins as prettyFormatPlugins, format as prettyFormat } from 'pretty-format'
+import { format as prettyFormat, plugins as prettyFormatPlugins } from 'pretty-format'
 import type { Plugin } from 'pretty-format'
 import HtmlFormat from './plugins/html.js'
 
@@ -21,7 +21,7 @@ const builtinPlugins: Plugin[] = [
   HtmlFormat,
 ]
 
-export function format (value: any, plugins: Plugin[]) {
+export function format(value: any, plugins: Plugin[]) {
   return prettyFormat(value, {
     escapeRegex: true,
     printFunctionName: false,

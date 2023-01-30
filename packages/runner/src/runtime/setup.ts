@@ -1,11 +1,13 @@
-import { SnokaConfig, setupConfigLoader } from '@snoka/config'
+import type { SnokaConfig } from '@snoka/config'
+import { setupConfigLoader } from '@snoka/config'
 import { setupConsole } from './console.js'
 
 let initialized = false
 export let baseConfig: SnokaConfig
 
-export async function setupWorker () {
-  if (initialized) return
+export async function setupWorker() {
+  if (initialized)
+    return
 
   // Base config
   const configLoader = await setupConfigLoader()

@@ -1,5 +1,15 @@
 <script lang="ts">
 import gql from 'graphql-tag'
+</script>
+
+<script lang="ts" setup>
+import { SearchIcon } from '@zhuowenli/vue-feather-icons'
+import type { Ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useQuery } from '@vue/apollo-composable'
+import { useRoute } from 'vue-router'
+import BaseInput from '../BaseInput.vue'
+import TestFileItem from './TestFileItem.vue'
 
 export const runTestFileListFragment = gql`
 fragment runTestFileList on RunTestFile {
@@ -15,15 +25,6 @@ fragment runTestFileList on RunTestFile {
   envName
 }
 `
-</script>
-
-<script lang="ts" setup>
-import { SearchIcon } from '@zhuowenli/vue-feather-icons'
-import { computed, Ref, ref } from 'vue'
-import { useQuery } from '@vue/apollo-composable'
-import { useRoute } from 'vue-router'
-import BaseInput from '../BaseInput.vue'
-import TestFileItem from './TestFileItem.vue'
 
 const route = useRoute()
 
@@ -59,8 +60,8 @@ const { result, subscribeToMore } = useQuery(() => route.params.runId !== 'last-
   ${runTestFileListFragment}
 `, () => route.params.runId !== 'last-run'
   ? {
-    id: route.params.runId,
-  }
+      id: route.params.runId,
+    }
   : {})
 const testFiles = computed(() => result.value?.run.runTestFiles ?? [])
 const previousErrorFiles = computed(() => result.value?.run.previousErrorRunTestFiles ?? [])
@@ -71,7 +72,8 @@ const createFilter = (target: Readonly<Ref<Readonly<any>>>) => {
   return () => {
     if (!searchText.value) {
       return target.value
-    } else {
+    }
+    else {
       const reg = new RegExp(searchText.value, 'i')
       return target.value.filter((f: any) => f.testFile.relativePath.search(reg) !== -1)
     }

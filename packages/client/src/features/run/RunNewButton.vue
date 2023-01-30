@@ -47,7 +47,7 @@ const { mutate, loading: mutating } = useMutation(gql`
   },
 })
 
-async function run () {
+async function run() {
   await mutate()
 }
 

@@ -21,21 +21,19 @@ const configFileNames = [
   '.snoka.js',
 ]
 
-export function resolveConfigFile (cwd: string = process.cwd()): string {
+export function resolveConfigFile(cwd: string = process.cwd()): string {
   let { root } = path.parse(cwd)
   let dir = cwd
 
   // Fix for windows, waiting for pathe to fix this: https://github.com/unjs/pathe/issues/5
-  if (root === '' && dir[1] === ':') {
+  if (root === '' && dir[1] === ':')
     root = dir.substring(0, 2)
-  }
 
   while (dir !== root) {
     for (const fileName of configFileNames) {
       const searchPath = path.join(dir, fileName)
-      if (fs.existsSync(searchPath)) {
+      if (fs.existsSync(searchPath))
         return searchPath
-      }
     }
     dir = path.dirname(dir)
   }
@@ -43,11 +41,11 @@ export function resolveConfigFile (cwd: string = process.cwd()): string {
   return null
 }
 
-export async function setupConfigLoader (options: SnokaConfigLoaderOptions = {}) {
-  async function loadConfig (loadFromVite = true): Promise<SnokaConfig> {
+export async function setupConfigLoader(options: SnokaConfigLoaderOptions = {}) {
+  async function loadConfig(loadFromVite = true): Promise<SnokaConfig> {
     const cwd = options.baseDir || process.cwd()
     const file = await resolveConfigFile(cwd)
-    const resolvedPath = file + nanoid() + '.temp.mjs'
+    const resolvedPath = `${file + nanoid()}.temp.mjs`
     try {
       let config: SnokaConfig = {}
 
@@ -67,10 +65,10 @@ export async function setupConfigLoader (options: SnokaConfigLoaderOptions = {})
         try {
           const { resolveConfig: resolveViteConfig } = await import('vite')
           const viteConfig = await resolveViteConfig({}, 'serve')
-          if (viteConfig?.test) {
+          if (viteConfig?.test)
             config = mergeConfig(config, viteConfig.test)
-          }
-        } catch (e) {
+        }
+        catch (e) {
           consola.error(`Failed to resolve vite config: ${e.stack ?? e.message}`)
         }
       }
@@ -78,15 +76,16 @@ export async function setupConfigLoader (options: SnokaConfigLoaderOptions = {})
       config = mergeConfig(defaultSnokaConfig(), config)
 
       return processConfig(config)
-    } catch (e) {
-      if (fs.existsSync(resolvedPath)) {
+    }
+    catch (e) {
+      if (fs.existsSync(resolvedPath))
         fs.unlinkSync(resolvedPath)
-      }
+
       consola.error(e)
     }
   }
 
-  function destroy () {
+  function destroy() {
     // noop
   }
 
