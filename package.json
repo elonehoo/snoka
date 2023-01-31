@@ -1,6 +1,6 @@
 {
   "name": "@snoka/monorepo",
-  "version": "0.0.0",
+  "version": "0.0.1-beta.0",
   "private": "true",
   "description": "A fast and fun test runner for Vite & Node Powered by Vite.",
   "author": "Elone Hoo <hi@elonehoo.me>",

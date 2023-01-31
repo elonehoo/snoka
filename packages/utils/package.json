@@ -1,7 +1,7 @@
 {
   "name": "@snoka/utils",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1-beta.0",
   "description": "Common utilities for Snoka, the testing framework for curious minds",
   "author": "Elone Hoo <hi@elonehoo.me>",
   "license": "MIT",
